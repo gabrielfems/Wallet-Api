@@ -16,8 +16,5 @@ public record TransactionTransferDTO(
         Long senderId,
 
         @NotNull(message = "Destinatário obrigatório")
-        Long receiverId,
-
-        @NotNull(message = "Tipo obrigatório")
-        TransactionType type
+        Long receiverId
 ) {}

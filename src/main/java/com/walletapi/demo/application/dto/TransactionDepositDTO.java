@@ -13,8 +13,5 @@ public record TransactionDepositDTO(
         BigDecimal amount,
 
         @NotNull(message = "Remetente obrigatório")
-        Long senderId,
-
-        @NotNull(message = "Tipo obrigatório")
-        TransactionType type
+        Long senderId
 ) {}

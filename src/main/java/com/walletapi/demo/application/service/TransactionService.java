@@ -33,10 +33,10 @@ public class TransactionService {
 
         Transaction transaction = buildTransaction(
                 data.amount(),
-                data.type(),
                 sender.getWallet(),
                 sender, receiver
         );
+        transaction.setType(TransactionType.TRANSFER);
 
         transactionRepository.save(transaction);
         userService.saveUser(sender);
@@ -51,7 +51,13 @@ public class TransactionService {
 
         executeService.executeDeposit(user, data.amount());
 
-        Transaction transaction = buildTransaction(data.amount(), data.type(), user.getWallet(), user, null);
+        Transaction transaction = buildTransaction(
+                data.amount(),
+                user.getWallet(),
+                user,
+                null);
+        transaction.setType(TransactionType.DEPOSIT);
+
         transactionRepository.save(transaction);
         userService.saveUser(user);
 
@@ -65,17 +71,22 @@ public class TransactionService {
         authService.validateWithdraw(user, data.amount());
         executeService.executeWithdraw(user, data.amount());
 
-        Transaction transaction = buildTransaction(data.amount(), data.type(), user.getWallet(), user, null);
+        Transaction transaction = buildTransaction(
+                data.amount(),
+                user.getWallet(),
+                user,
+                null);
+        transaction.setType(TransactionType.WITHDRAW);
+
         transactionRepository.save(transaction);
         userService.saveUser(user);
 
         return transaction;
     }
 
-    public Transaction buildTransaction(BigDecimal amount, TransactionType type, Wallet wallet, User sender, User receiver) {
+    public Transaction buildTransaction(BigDecimal amount, Wallet wallet, User sender, User receiver) {
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
-        transaction.setType(type);
         transaction.setWallet(wallet);
         transaction.setSender(sender);
         transaction.setReceiver(receiver);
