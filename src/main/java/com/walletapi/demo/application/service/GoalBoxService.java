@@ -58,7 +58,7 @@ public class GoalBoxService {
 
     public GoalBox deposit(Long userId, Long boxId, BigDecimal amount) {
         GoalBox box = getBox(userId, boxId);
-        User user = userRepository.findById(userId).get();
+        User user = userService.findById(userId);
 
         if (user.getWallet().getBalance().compareTo(amount) >= 0) {
 
