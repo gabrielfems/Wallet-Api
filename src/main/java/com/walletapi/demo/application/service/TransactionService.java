@@ -8,6 +8,7 @@ import com.walletapi.demo.domain.enums.TransactionType;
 import com.walletapi.demo.domain.entities.User;
 import com.walletapi.demo.domain.entities.Wallet;
 import com.walletapi.demo.infrastructure.repositories.TransactionRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class TransactionService {
     private final UserService userService;
     private final ExecuteService executeService;
 
+    @Transactional
     public Transaction createTransfer(TransactionTransferDTO data) {
         User sender = authService.validateSender(data.senderId());
         User receiver = authService.validateReceiver(data.receiverId());
@@ -43,6 +45,7 @@ public class TransactionService {
         return transaction;
     }
 
+    @Transactional
     public Transaction createDeposit(TransactionDepositDTO data) {
         User user = authService.validateSender(data.senderId());
 
@@ -55,6 +58,7 @@ public class TransactionService {
         return transaction;
     }
 
+    @Transactional
     public Transaction createWithdraw(TransactionWithdrawDTO data) {
         User user = authService.validateSender(data.senderId());
 
