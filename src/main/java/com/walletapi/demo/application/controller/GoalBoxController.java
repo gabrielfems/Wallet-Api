@@ -5,6 +5,7 @@ import com.walletapi.demo.domain.entities.GoalBox;
 import com.walletapi.demo.application.service.GoalBoxService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +14,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users/{userId}/goal-boxes")
-@RequiredArgsConstructor
 public class GoalBoxController {
 
-    private final GoalBoxService boxService;
+    @Autowired
+    private GoalBoxService boxService;
 
     @PostMapping
     public ResponseEntity<GoalBoxResponseDTO> createBox(@PathVariable Long userId, @Valid @RequestBody GoalBoxCreateDTO dto) {
