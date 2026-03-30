@@ -28,15 +28,16 @@ public class UserController {
     @PostMapping
     @Operation(summary= "Cadastrar usuário", description= "Cadastra um novo usuário na base de dados")
     @ApiResponse(responseCode = "201", description = "Usuário cadastrado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
-    @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    @ApiResponse(responseCode = "400", description = "Requisição inválida ou dados obrigatórios ausentes")
+    @ApiResponse(responseCode = "404", description = "CEP não encontrado")
+    @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
         return new ResponseEntity<>(UserResponseDTO.from(userService.createUser(dto)), HttpStatus.CREATED);
     }
 
     @GetMapping("/list")
     @Operation(summary= "Listar usuários", description= "Lista todos os usuários cadastrados")
-    @ApiResponse(responseCode = "201", description = "Usuários encontrados com sucesso")
+    @ApiResponse(responseCode = "200", description = "Usuários encontrados com sucesso")
     @ApiResponse(responseCode = "500", description = "Erro no servidor")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
@@ -44,9 +45,10 @@ public class UserController {
 
     @PatchMapping("/{id}")
     @Operation(summary= "Atualizar usuário", description= "Método para atualizar os dados de um usuário")
-    @ApiResponse(responseCode = "201", description = "Usuário atualizado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
-    @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso")
+    @ApiResponse(responseCode = "400", description = "Requisição inválida ou dados obrigatórios ausentes")
+    @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto) {
         User newUpdate = userService.updateUser(id, dto);
         return ResponseEntity.ok(UserResponseDTO.from(newUpdate));
@@ -54,9 +56,9 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @Operation(summary= "Deletar usuário", description= "Remove um usuário da base de dados")
-    @ApiResponse(responseCode = "201", description = "Usuário deletado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
-    @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    @ApiResponse(responseCode = "204", description = "Usuário deletado com sucesso")
+    @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();

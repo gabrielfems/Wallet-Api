@@ -27,9 +27,11 @@ public class TransactionController {
 
     @PostMapping("/transfer")
     @Operation(summary= "Transferência", description= "Realiza uma transação entre usuários cadastrados")
-    @ApiResponse(responseCode = "201", description = "Transferência realizada com sucesso")
-    @ApiResponse(responseCode = "400", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
-    @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    @ApiResponse(responseCode = "200", description = "Transferência realizada com sucesso")
+    @ApiResponse(responseCode = "400", description = "Requisição inválida ou tipo de transação inválido")
+    @ApiResponse(responseCode = "404", description = "Usuário remetente ou destinatário não encontrado")
+    @ApiResponse(responseCode = "422", description = "Saldo insuficiente para transferência")
+    @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     public ResponseEntity<TransactionResponseDTO> createTransfer(@Valid @RequestBody TransactionTransferDTO data) {
         TransactionResponseDTO response = TransactionResponseDTO.from(
                 transactionService.createTransfer(data)
@@ -40,9 +42,11 @@ public class TransactionController {
 
     @PostMapping("/deposit")
     @Operation(summary= "Depósito", description= "Deposita dinheiro em uma conta específica")
-    @ApiResponse(responseCode = "201", description = "Depósito realizado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
-    @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    @ApiResponse(responseCode = "200", description = "Transferência realizada com sucesso")
+    @ApiResponse(responseCode = "400", description = "Requisição inválida ou tipo de transação inválido")
+    @ApiResponse(responseCode = "404", description = "Usuário remetente ou destinatário não encontrado")
+    @ApiResponse(responseCode = "422", description = "Saldo insuficiente para transferência")
+    @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     public ResponseEntity<TransactionResponseDTO> createDeposit(@Valid @RequestBody TransactionDepositDTO data) {
         TransactionResponseDTO response = TransactionResponseDTO.from(
                 transactionService.createDeposit(data)
@@ -53,9 +57,11 @@ public class TransactionController {
 
     @PostMapping("/withdraw")
     @Operation(summary= "Saque", description= "Saca o dinheiro presente na conta")
-    @ApiResponse(responseCode = "201", description = "Saque realizado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
-    @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    @ApiResponse(responseCode = "200", description = "Saque realizado com sucesso")
+    @ApiResponse(responseCode = "400", description = "Requisição inválida ou tipo de transação inválido")
+    @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    @ApiResponse(responseCode = "422", description = "Saldo insuficiente para saque")
+    @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     public ResponseEntity<TransactionResponseDTO> createWithdraw(@Valid @RequestBody TransactionWithdrawDTO data) {
         TransactionResponseDTO response = TransactionResponseDTO.from(
                 transactionService.createWithdraw(data)
