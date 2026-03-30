@@ -6,6 +6,7 @@ import com.walletapi.demo.application.dto.TransactionResponseDTO;
 import com.walletapi.demo.application.dto.TransactionWithdrawDTO;
 import com.walletapi.demo.application.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class TransactionController {
 
     @PostMapping("/transfer")
     @Operation(summary= "Transferência", description= "Realiza uma transação entre usuários cadastrados")
+    @ApiResponse(responseCode = "201", description = "Transferência realizada com sucesso")
+    @ApiResponse(responseCode = "400", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
+    @ApiResponse(responseCode = "500", description = "Erro no servidor")
     public ResponseEntity<TransactionResponseDTO> createTransfer(@Valid @RequestBody TransactionTransferDTO data) {
         TransactionResponseDTO response = TransactionResponseDTO.from(
                 transactionService.createTransfer(data)
@@ -36,6 +40,9 @@ public class TransactionController {
 
     @PostMapping("/deposit")
     @Operation(summary= "Depósito", description= "Deposita dinheiro em uma conta específica")
+    @ApiResponse(responseCode = "201", description = "Depósito realizado com sucesso")
+    @ApiResponse(responseCode = "400", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
+    @ApiResponse(responseCode = "500", description = "Erro no servidor")
     public ResponseEntity<TransactionResponseDTO> createDeposit(@Valid @RequestBody TransactionDepositDTO data) {
         TransactionResponseDTO response = TransactionResponseDTO.from(
                 transactionService.createDeposit(data)
@@ -46,6 +53,9 @@ public class TransactionController {
 
     @PostMapping("/withdraw")
     @Operation(summary= "Saque", description= "Saca o dinheiro presente na conta")
+    @ApiResponse(responseCode = "201", description = "Saque realizado com sucesso")
+    @ApiResponse(responseCode = "400", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
+    @ApiResponse(responseCode = "500", description = "Erro no servidor")
     public ResponseEntity<TransactionResponseDTO> createWithdraw(@Valid @RequestBody TransactionWithdrawDTO data) {
         TransactionResponseDTO response = TransactionResponseDTO.from(
                 transactionService.createWithdraw(data)
