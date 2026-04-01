@@ -10,7 +10,6 @@ import com.walletapi.demo.application.exceptions.UnauthorizedBoxAccessException;
 import com.walletapi.demo.domain.entities.GoalBox;
 import com.walletapi.demo.domain.entities.User;
 import com.walletapi.demo.infrastructure.repositories.GoalBoxRepository;
-import com.walletapi.demo.infrastructure.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ public class GoalBoxService {
 
     private final GoalBoxRepository boxRepository;
     private final UserService userService;
-    private final UserRepository userRepository;
 
     public GoalBox createBox(Long userId, GoalBoxCreateDTO dto) {
         User user = userService.findById(userId);
@@ -66,10 +64,10 @@ public class GoalBoxService {
 
             box.setCurrentBalance(box.getCurrentBalance().add(amount));
             user.getWallet().setBalance(user.getWallet().getBalance().subtract(amount));
-            userRepository.save(user);
+            userService.saveUser(user);
 
         } else {
-            throw new InsufficientBalanceException("Saldo insuficiente");
+            throw new InsufficientBalanceException();
 
         }
         return boxRepository.save(box);
@@ -85,13 +83,14 @@ public class GoalBoxService {
         GoalBox box = getBox(userId, boxId);
 
         if (box.getCurrentBalance().compareTo(amount) < 0) {
-            throw new InsufficientBalanceException("Saldo insuficiente na caixinha");
+            throw new InsufficientBalanceException();
         }
 
-        box.setCurrentBalance(box.getCurrentBalance().subtract(amount));
-        box.getUser().getWallet().setBalance(box.getCurrentBalance().add(amount));
+        BigDecimal newBoxBalance = box.getCurrentBalance().subtract(amount);
+        box.setCurrentBalance(newBoxBalance);
+        box.getUser().getWallet().setBalance(box.getUser().getWallet().getBalance().add(amount));
 
-        userRepository.save(box.getUser());
+        userService.saveUser(box.getUser());
         return boxRepository.save(box);
     }
 
