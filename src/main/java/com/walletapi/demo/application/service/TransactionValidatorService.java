@@ -7,14 +7,13 @@ import com.walletapi.demo.application.exceptions.ReceiverUserNotFoundException;
 import com.walletapi.demo.domain.entities.User;
 import com.walletapi.demo.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
-public class AuthorizationService {
+public class TransactionValidatorService {
 
     private final UserRepository userRepository;
 
