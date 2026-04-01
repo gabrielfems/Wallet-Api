@@ -15,13 +15,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users/{userId}/goal-boxes")
 @Tag(name= "Caixinha", description= "Caixinha de metas do usuário")
 public class GoalBoxController {
 
     @Autowired
-    private GoalBoxService boxService;
+    private final GoalBoxService boxService;
 
     @PostMapping
     @Operation(summary= "Criar caixinha", description= "Cria caixinha com metas pessoais do usuário")

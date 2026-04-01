@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class TransactionService {
 
-    private final AuthorizationService authService;
+    private final TransactionValidatorService authService;
     private final TransactionRepository transactionRepository;
     private final UserService userService;
     private final ExecuteService executeService;
