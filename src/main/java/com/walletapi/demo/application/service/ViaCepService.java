@@ -21,7 +21,7 @@ public class ViaCepService {
         ViaCepResponseDTO response = restTemplate.getForObject(url, ViaCepResponseDTO.class);
 
         if (response == null || response.cep() == null) {
-            throw new CepNotFoundException("CEP não encontrado: " + cep);
+            throw new CepNotFoundException(cep);
         }
 
         return response;

@@ -52,7 +52,18 @@ public class UserService {
     public User updateUser(Long id, UserUpdateDTO dto) {
         User user = findById(id);
 
-        user.setCep(dto.cep() != null ? dto.cep() : user.getCep());
+        if (dto.cep() != null) {
+            ViaCepResponseDTO endereco = viaCepService.buscarEnderecoPorCep(dto.cep());
+            String enderecoCompleto = viaCepService.montarEnderecoCompleto(
+                    endereco,
+                    dto.numero() != null ? dto.numero() : user.getNumero(),
+                    dto.complemento() != null ? dto.complemento() : user.getComplemento()
+            );
+            user.setCep(enderecoCompleto);
+            user.setNumero(dto.numero() != null ? dto.numero() : user.getNumero());
+            user.setComplemento(dto.complemento() != null ? dto.complemento() : user.getComplemento());
+        }
+
         user.setPhone(dto.phone() != null ? dto.phone() : user.getPhone());
         user.setPassword(dto.password() != null ? dto.password() : user.getPassword());
         user.setName(dto.name() != null ? dto.name() : user.getName());

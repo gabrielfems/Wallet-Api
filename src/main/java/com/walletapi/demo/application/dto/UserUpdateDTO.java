@@ -27,6 +27,10 @@ public record UserUpdateDTO(
         @Pattern(regexp = "\\d{8}|\\d{5}-\\d{3}", message = "CEP inválido. Formato: 12345678 ou 12345-678")
         String cep,
 
+        String numero,
+
+        String complemento,
+
         @Past(message = "Data de nascimento deve ser no passado")
         LocalDate birthDate,
 
