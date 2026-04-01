@@ -1,14 +1,13 @@
 package com.walletapi.demo.application.controller;
 
 import com.walletapi.demo.application.dto.*;
-import com.walletapi.demo.domain.entities.GoalBox;
 import com.walletapi.demo.application.service.GoalBoxService;
+import com.walletapi.demo.domain.entities.GoalBox;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +20,6 @@ import java.util.List;
 @Tag(name= "Caixinha", description= "Caixinha de metas do usuário")
 public class GoalBoxController {
 
-    @Autowired
     private final GoalBoxService boxService;
 
     @PostMapping
