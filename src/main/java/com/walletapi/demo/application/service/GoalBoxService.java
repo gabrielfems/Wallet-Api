@@ -11,6 +11,7 @@ import com.walletapi.demo.domain.entities.GoalBox;
 import com.walletapi.demo.domain.entities.User;
 import com.walletapi.demo.infrastructure.repositories.GoalBoxRepository;
 import com.walletapi.demo.infrastructure.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,7 @@ public class GoalBoxService {
         return box;
     }
 
+    @Transactional
     public GoalBox deposit(Long userId, Long boxId, BigDecimal amount) {
         GoalBox box = getBox(userId, boxId);
         User user = userService.findById(userId);
@@ -78,6 +80,7 @@ public class GoalBoxService {
         boxRepository.delete(box);
     }
 
+    @Transactional
     public GoalBox withdraw(Long userId, Long boxId, BigDecimal amount) {
         GoalBox box = getBox(userId, boxId);
 
@@ -86,7 +89,9 @@ public class GoalBoxService {
         }
 
         box.setCurrentBalance(box.getCurrentBalance().subtract(amount));
+        box.getUser().getWallet().setBalance(box.getCurrentBalance().add(amount));
 
+        userRepository.save(box.getUser());
         return boxRepository.save(box);
     }
 

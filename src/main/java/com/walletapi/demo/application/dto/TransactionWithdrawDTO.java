@@ -1,6 +1,5 @@
 package com.walletapi.demo.application.dto;
 
-import com.walletapi.demo.domain.enums.TransactionType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 

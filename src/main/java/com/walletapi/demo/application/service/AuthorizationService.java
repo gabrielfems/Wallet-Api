@@ -6,16 +6,17 @@ import com.walletapi.demo.application.exceptions.SenderUserNotFoundException;
 import com.walletapi.demo.application.exceptions.ReceiverUserNotFoundException;
 import com.walletapi.demo.domain.entities.User;
 import com.walletapi.demo.infrastructure.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
 @Service
+@RequiredArgsConstructor
 public class AuthorizationService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public User validateSender(Long fromUserId) {
         return userRepository.findById(fromUserId)
