@@ -74,9 +74,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull HttpHeaders headers,
             @NonNull HttpStatusCode status,
             @NonNull WebRequest request) {
-        String message = "Requisição inválida.";
+        String message = "Invalid Request.";
         if (ex.getCause() instanceof InvalidFormatException cause && cause.getTargetType().isEnum()) {
-            message = "Tipo de transação inválido: " + cause.getValue();
+            message = "Invalid Transaction Type: " + cause.getValue();
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new RestErrorMessage(HttpStatus.BAD_REQUEST, message));
@@ -93,7 +93,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                 .stream()
                 .map(FieldError::getDefaultMessage)
                 .findFirst()
-                .orElse("Requisição inválida.");
+                .orElse("Invalid Request.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new RestErrorMessage(HttpStatus.BAD_REQUEST, message));
     }
