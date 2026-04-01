@@ -1,9 +1,8 @@
 package com.walletapi.demo.application.service;
 
-import com.walletapi.demo.application.exceptions.AmountException;
 import com.walletapi.demo.application.exceptions.BalanceException;
-import com.walletapi.demo.application.exceptions.SenderUserNotFoundException;
 import com.walletapi.demo.application.exceptions.ReceiverUserNotFoundException;
+import com.walletapi.demo.application.exceptions.SenderUserNotFoundException;
 import com.walletapi.demo.domain.entities.User;
 import com.walletapi.demo.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,7 @@ public class TransactionValidatorService {
 
     public void validateWithdraw(User fromUser, BigDecimal amount) {
         if (fromUser.getWallet().getBalance().compareTo(amount) < 0) {
-            throw new AmountException();
+            throw new BalanceException();
         }
     }
 }

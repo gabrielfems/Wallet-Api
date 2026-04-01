@@ -73,8 +73,13 @@ public class GoalBoxService {
         return boxRepository.save(box);
     }
 
+    @Transactional
     public void deleteBox(Long userId, Long boxId) {
         GoalBox box = getBox(userId, boxId);
+        User user = userService.findById(userId);
+
+        user.getWallet().setBalance(user.getWallet().getBalance().add(box.getCurrentBalance()));
+
         boxRepository.delete(box);
     }
 
