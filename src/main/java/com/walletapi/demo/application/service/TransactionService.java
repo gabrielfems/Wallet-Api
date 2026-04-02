@@ -18,17 +18,17 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class TransactionService {
 
-    private final TransactionValidatorService authService;
+    private final TransactionValidatorService validatorService;
     private final TransactionRepository transactionRepository;
     private final UserService userService;
     private final ExecuteService executeService;
 
     @Transactional
     public Transaction createTransfer(TransactionTransferDTO data) {
-        User sender = authService.validateSender(data.senderId());
-        User receiver = authService.validateReceiver(data.receiverId());
+        User sender = validatorService.validateSender(data.senderId());
+        User receiver = validatorService.validateReceiver(data.receiverId());
 
-        authService.validateTransfer(sender, data.amount());
+        validatorService.validateTransfer(sender, data.amount());
         executeService.executeTransfer(sender, receiver, data.amount());
 
         Transaction transaction = buildTransaction(
@@ -47,7 +47,7 @@ public class TransactionService {
 
     @Transactional
     public Transaction createDeposit(TransactionDepositDTO data) {
-        User user = authService.validateSender(data.senderId());
+        User user = validatorService.validateSender(data.userId());
 
         executeService.executeDeposit(user, data.amount());
 
@@ -66,9 +66,9 @@ public class TransactionService {
 
     @Transactional
     public Transaction createWithdraw(TransactionWithdrawDTO data) {
-        User user = authService.validateSender(data.senderId());
+        User user = validatorService.validateSender(data.senderId());
 
-        authService.validateWithdraw(user, data.amount());
+        validatorService.validateWithdraw(user, data.amount());
         executeService.executeWithdraw(user, data.amount());
 
         Transaction transaction = buildTransaction(
@@ -84,7 +84,7 @@ public class TransactionService {
         return transaction;
     }
 
-    public Transaction buildTransaction(BigDecimal amount, Wallet wallet, User sender, User receiver) {
+    private Transaction buildTransaction(BigDecimal amount, Wallet wallet, User sender, User receiver) {
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setWallet(wallet);
