@@ -38,11 +38,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
-    @ExceptionHandler(BalanceException.class)
-    private ResponseEntity<RestErrorMessage> balanceHandler(BalanceException exception) {
-        return buildResponse(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
-    }
-
     @ExceptionHandler(InsufficientBalanceException.class)
     private ResponseEntity<RestErrorMessage> insufficientBalanceHandler(InsufficientBalanceException exception) {
         return buildResponse(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
