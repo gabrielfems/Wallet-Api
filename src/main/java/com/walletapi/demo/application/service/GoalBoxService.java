@@ -80,6 +80,7 @@ public class GoalBoxService {
 
         user.getWallet().setBalance(user.getWallet().getBalance().add(box.getCurrentBalance()));
 
+        userService.saveUser(user);
         boxRepository.delete(box);
     }
 
