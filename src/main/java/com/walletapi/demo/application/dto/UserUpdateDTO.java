@@ -32,12 +32,6 @@ public record UserUpdateDTO(
         String complemento,
 
         @Past(message = "Data de nascimento deve ser no passado")
-        LocalDate birthDate,
-
-        @Pattern(
-                regexp = "^(\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}|\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2})$",
-                message = "Documento inválido. Ex: CPF: 123.456.789-00 ou CNPJ: 12.345.678/0001-00"
-        )
-        String document
+        LocalDate birthDate
 
 ) {}
