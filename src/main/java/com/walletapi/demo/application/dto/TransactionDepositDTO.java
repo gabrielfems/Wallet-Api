@@ -11,6 +11,6 @@ public record TransactionDepositDTO(
         @Positive(message = "Valor deve ser positivo")
         BigDecimal amount,
 
-        @NotNull(message = "Remetente obrigatório")
-        Long senderId
+        @NotNull(message = "Usuário obrigatório")
+        Long userId
 ) {}
