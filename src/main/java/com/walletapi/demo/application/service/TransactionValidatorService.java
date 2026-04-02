@@ -1,6 +1,6 @@
 package com.walletapi.demo.application.service;
 
-import com.walletapi.demo.application.exceptions.BalanceException;
+import com.walletapi.demo.application.exceptions.InsufficientBalanceException;
 import com.walletapi.demo.application.exceptions.ReceiverUserNotFoundException;
 import com.walletapi.demo.application.exceptions.SenderUserNotFoundException;
 import com.walletapi.demo.domain.entities.User;
@@ -28,13 +28,13 @@ public class TransactionValidatorService {
 
     public void validateTransfer(User fromUser, BigDecimal amount) {
         if (fromUser.getWallet().getBalance().compareTo(amount) < 0) {
-            throw new BalanceException();
+            throw new InsufficientBalanceException();
         }
     }
 
     public void validateWithdraw(User fromUser, BigDecimal amount) {
         if (fromUser.getWallet().getBalance().compareTo(amount) < 0) {
-            throw new BalanceException();
+            throw new InsufficientBalanceException();
         }
     }
 }
