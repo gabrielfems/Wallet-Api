@@ -69,7 +69,6 @@ public class UserService {
         user.setName(dto.name() != null ? dto.name() : user.getName());
         user.setBirthDate(dto.birthDate() != null ? dto.birthDate() : user.getBirthDate());
         user.setEmail(dto.email() != null ? dto.email() : user.getEmail());
-        user.setDocument(dto.document() != null ? dto.document() : user.getDocument());
 
         return userRepository.save(user);
     }
