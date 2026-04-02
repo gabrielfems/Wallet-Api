@@ -1,4 +1,3 @@
-// GoalBoxService.java
 package com.walletapi.demo.application.service;
 
 import com.walletapi.demo.application.dto.GoalBoxCreateDTO;
@@ -9,6 +8,7 @@ import com.walletapi.demo.application.exceptions.InsufficientBalanceException;
 import com.walletapi.demo.application.exceptions.UnauthorizedBoxAccessException;
 import com.walletapi.demo.domain.entities.GoalBox;
 import com.walletapi.demo.domain.entities.User;
+import com.walletapi.demo.domain.entities.Wallet;
 import com.walletapi.demo.infrastructure.repositories.GoalBoxRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -58,18 +58,16 @@ public class GoalBoxService {
     @Transactional
     public GoalBox deposit(Long userId, Long boxId, BigDecimal amount) {
         GoalBox box = getBox(userId, boxId);
-        User user = userService.findById(userId);
+        Wallet wallet = box.getUser().getWallet();
 
-        if (user.getWallet().getBalance().compareTo(amount) >= 0) {
-
-            box.setCurrentBalance(box.getCurrentBalance().add(amount));
-            user.getWallet().setBalance(user.getWallet().getBalance().subtract(amount));
-            userService.saveUser(user);
-
-        } else {
+        if (wallet.getBalance().compareTo(amount) < 0) {
             throw new InsufficientBalanceException();
-
         }
+
+        box.setCurrentBalance(box.getCurrentBalance().add(amount));
+        wallet.setBalance(wallet.getBalance().subtract(amount));
+        userService.saveUser(box.getUser());
+
         return boxRepository.save(box);
     }
 
@@ -87,6 +85,7 @@ public class GoalBoxService {
     @Transactional
     public GoalBox withdraw(Long userId, Long boxId, BigDecimal amount) {
         GoalBox box = getBox(userId, boxId);
+        Wallet wallet = box.getUser().getWallet();
 
         if (box.getCurrentBalance().compareTo(amount) < 0) {
             throw new InsufficientBalanceException();
@@ -94,7 +93,7 @@ public class GoalBoxService {
 
         BigDecimal newBoxBalance = box.getCurrentBalance().subtract(amount);
         box.setCurrentBalance(newBoxBalance);
-        box.getUser().getWallet().setBalance(box.getUser().getWallet().getBalance().add(amount));
+        wallet.setBalance(wallet.getBalance().add(amount));
 
         userService.saveUser(box.getUser());
         return boxRepository.save(box);
