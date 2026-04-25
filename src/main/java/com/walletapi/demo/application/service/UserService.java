@@ -4,6 +4,8 @@ import com.walletapi.demo.application.dto.UserCreateDTO;
 import com.walletapi.demo.application.dto.UserResponseDTO;
 import com.walletapi.demo.application.dto.UserUpdateDTO;
 import com.walletapi.demo.application.dto.ViaCepResponseDTO;
+import com.walletapi.demo.application.exceptions.ReceiverUserNotFoundException;
+import com.walletapi.demo.application.exceptions.SenderUserNotFoundException;
 import com.walletapi.demo.application.exceptions.UserNotFoundException;
 import com.walletapi.demo.domain.entities.User;
 import com.walletapi.demo.infrastructure.repositories.UserRepository;
@@ -20,7 +22,10 @@ public class UserService {
     private final ViaCepService viaCepService;
     private final UserRepository userRepository;
 
-    public User findById(Long id) { return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));}
+    public User findUserById(Long id) { return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));}
+    public User findSenderById(Long id) { return userRepository.findById(id).orElseThrow(() -> new SenderUserNotFoundException());}
+    public User findReceiverById(Long id) { return userRepository.findById(id).orElseThrow(() -> new ReceiverUserNotFoundException());}
+
     public void saveUser(User user) {
         this.userRepository.save(user);
     }
@@ -50,7 +55,7 @@ public class UserService {
     }
 
     public User updateUser(Long id, UserUpdateDTO dto) {
-        User user = findById(id);
+        User user = findUserById(id);
 
         if (dto.cep() != null) {
             ViaCepResponseDTO endereco = viaCepService.buscarEnderecoPorCep(dto.cep());
@@ -74,7 +79,7 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
-        userRepository.delete(findById(id));
+        userRepository.delete(findUserById(id));
     }
 }
 
