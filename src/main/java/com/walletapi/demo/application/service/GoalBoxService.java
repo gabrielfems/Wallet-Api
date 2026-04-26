@@ -25,7 +25,7 @@ public class GoalBoxService {
     private final UserService userService;
 
     public GoalBox createBox(Long userId, GoalBoxCreateDTO dto) {
-        User user = userService.findById(userId);
+        User user = userService.findUserById(userId);
 
         GoalBox box = new GoalBox();
         box.setName(dto.name());
@@ -37,7 +37,7 @@ public class GoalBoxService {
     }
 
     public List<GoalBoxResponseDTO> getUserBoxes(Long userId) {
-        userService.findById(userId);
+        userService.findUserById(userId);
         return boxRepository.findByUserId(userId)
                 .stream()
                 .map(GoalBoxResponseDTO::from)
@@ -74,7 +74,7 @@ public class GoalBoxService {
     @Transactional
     public void deleteBox(Long userId, Long boxId) {
         GoalBox box = getBox(userId, boxId);
-        User user = userService.findById(userId);
+        User user = userService.findUserById(userId);
 
         user.getWallet().setBalance(user.getWallet().getBalance().add(box.getCurrentBalance()));
 
