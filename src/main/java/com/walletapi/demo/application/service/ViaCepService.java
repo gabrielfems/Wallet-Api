@@ -2,17 +2,15 @@ package com.walletapi.demo.application.service;
 
 import com.walletapi.demo.application.dto.ViaCepResponseDTO;
 import com.walletapi.demo.application.exceptions.CepNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
+@RequiredArgsConstructor
 public class ViaCepService {
 
     private final RestTemplate restTemplate;
-
-    public ViaCepService() {
-        this.restTemplate = new RestTemplate();
-    }
 
     public ViaCepResponseDTO buscarEnderecoPorCep(String cep) {
         String cepLimpo = cep.replaceAll("[^0-9]", "");
