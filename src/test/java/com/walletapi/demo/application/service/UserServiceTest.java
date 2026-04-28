@@ -1,7 +1,10 @@
 package com.walletapi.demo.application.service;
 
 import com.walletapi.demo.application.dto.UserCreateDTO;
+import com.walletapi.demo.application.dto.UserResponseDTO;
+import com.walletapi.demo.application.dto.UserUpdateDTO;
 import com.walletapi.demo.application.dto.ViaCepResponseDTO;
+import com.walletapi.demo.application.exceptions.CepNotFoundException;
 import com.walletapi.demo.application.exceptions.ReceiverUserNotFoundException;
 import com.walletapi.demo.application.exceptions.SenderUserNotFoundException;
 import com.walletapi.demo.application.exceptions.UserNotFoundException;
@@ -16,6 +19,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,17 +42,16 @@ class UserServiceTest {
     @Mock
     UserRepository userRepository;
 
-    private UserCreateDTO dto1;
+    UserCreateDTO dtoValido;
+
+    ViaCepResponseDTO viaCepResponseDTO;
 
     @BeforeEach
     void setUp() {
-        UserCreateDTO dto1 = new UserCreateDTO(
+        dtoValido = new UserCreateDTO(
                 "Gabriel", "gabriel@gmail.com", "123@pass",
                 "44974002293", "87080078", "123", "b",
                 LocalDate.of(2002, 12, 20), "1234567890");
-
-        user = new User(dto1);
-        user.setId(1L);
     }
 
     @Test
@@ -139,17 +143,81 @@ class UserServiceTest {
     @DisplayName("Should create correctly an User with all his datas")
     void createUserCase1() {
 
+        ViaCepResponseDTO viaCepResponse = new ViaCepResponseDTO(
+                "87080-078", "Rua das Flores", "", "Jardim Alvorada", "Maringá", "PR"
+        );
+
+        String enderecoCompleto = "Rua das Flores, 123 - b, Jardim Alvorada, Maringá - PR, CEP: 87080-078";
+
+        when(viaCepService.buscarEnderecoPorCep("87080078")).thenReturn(viaCepResponse);
+        when(viaCepService.montarEnderecoCompleto(viaCepResponse, "123", "b")).thenReturn(enderecoCompleto);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        User result = userService.createUser(dtoValido);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getCep()).isEqualTo(enderecoCompleto);
+        assertThat(result.getNumero()).isEqualTo("123");
+        assertThat(result.getComplemento()).isEqualTo("b");
+
+        verify(viaCepService, times(1)).buscarEnderecoPorCep("87080078");
+        verify(viaCepService, times(1)).montarEnderecoCompleto(viaCepResponse, "123", "b");
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
-    void getAllUsers() {
+    @DisplayName("Should throw CepNotFoundException when CEP is invalid")
+    void createUserCase2() {
+        doThrow(new CepNotFoundException("00000000"))
+                .when(viaCepService).buscarEnderecoPorCep("00000000");
+
+        UserCreateDTO dtoInvalido = new UserCreateDTO(
+                "Gabriel", "gabriel@gmail.com", "123@pass",
+                "44974002293", "00000000", "123", "b",
+                LocalDate.of(2002, 12, 20), "1234567890"
+        );
+
+        assertThatThrownBy(() -> userService.createUser(dtoInvalido))
+                .isInstanceOf(CepNotFoundException.class);
     }
 
     @Test
+    @DisplayName("Should return a list of users")
+    void getAllUsersCase1() {
+        User userList = new User(dtoValido);
+
+        when(userRepository.findAll()).thenReturn(List.of(userList));
+
+        List<UserResponseDTO> list = userService.getAllUsers();
+
+        assertThat(list).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Should update user data")
     void updateUser() {
     }
 
     @Test
-    void deleteUser() {
+    @DisplayName("Should delete user when his id exists on db")
+    void deleteUserCase1() {
+        User userList = new User(dtoValido);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(userList));
+
+        userService.deleteUser(1L);
+
+        verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).delete(userList);
+    }
+
+    @Test
+    @DisplayName("Should throw exception because user id is not present")
+    void deleteUserCase2() {
+        doThrow(new UserNotFoundException(1L)).when(userRepository).findById(1L);
+
+        assertThatThrownBy(() -> userService.deleteUser(1L))
+                .isInstanceOf(UserNotFoundException.class);
+
     }
 }
