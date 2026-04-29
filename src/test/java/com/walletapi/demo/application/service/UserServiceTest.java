@@ -19,19 +19,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    private User user;
+    User user;
 
     @InjectMocks
     UserService userService;
@@ -44,14 +42,13 @@ class UserServiceTest {
 
     UserCreateDTO dtoValido;
 
-    ViaCepResponseDTO viaCepResponseDTO;
-
     @BeforeEach
     void setUp() {
         dtoValido = new UserCreateDTO(
                 "Gabriel", "gabriel@gmail.com", "123@pass",
                 "44974002293", "87080078", "123", "b",
                 LocalDate.of(2002, 12, 20), "1234567890");
+
     }
 
     @Test
@@ -194,8 +191,54 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Should update user data")
-    void updateUser() {
+    @DisplayName("Should update user with new CEP")
+    void updateUserCase1() {
+        User user = new User(dtoValido);
+
+        UserUpdateDTO dto = new UserUpdateDTO(null, null, null, null, "87080078", "456", null, null);
+
+        ViaCepResponseDTO viaCepResponse = new ViaCepResponseDTO(
+                "87080-078", "Rua das Flores", "", "Jardim Alvorada", "Maringá", "PR"
+        );
+        String enderecoCompleto = "Rua das Flores, 456, Jardim Alvorada, Maringá - PR, CEP: 87080-078";
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(viaCepService.buscarEnderecoPorCep("87080078")).thenReturn(viaCepResponse);
+        when(viaCepService.montarEnderecoCompleto(any(), any(), any())).thenReturn(enderecoCompleto);
+        when(userRepository.save(user)).thenReturn(user);
+
+        User result = userService.updateUser(1L, dto);
+
+        assertThat(result.getCep()).isEqualTo(enderecoCompleto);
+        verify(viaCepService, times(1)).buscarEnderecoPorCep("87080078");
+    }
+
+    @Test
+    @DisplayName("Should update user without changing address")
+    void updateUserCase2() {
+        User user = new User(dtoValido);
+
+        UserUpdateDTO dto = new UserUpdateDTO("NovoNome", null, null, null, null, null, null, null);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+
+        User result = userService.updateUser(1L, dto);
+
+        assertThat(result.getName()).isEqualTo("NovoNome");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when user is not found")
+    void updateUserCase3() {
+        UserUpdateDTO dto = new UserUpdateDTO(null, null, null, null, null, null, null, null);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.updateUser(1L, dto))
+                .isInstanceOf(UserNotFoundException.class);
+
+        verify(userRepository, never()).save(any());
     }
 
     @Test
