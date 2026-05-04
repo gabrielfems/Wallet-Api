@@ -44,6 +44,9 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
+        user = new User();
+        user.setId(1L);
+
         dtoValido = new UserCreateDTO(
                 "Gabriel", "gabriel@gmail.com", "123@pass",
                 "44974002293", "87080078", "123", "b",
@@ -210,7 +213,9 @@ class UserServiceTest {
         User result = userService.updateUser(1L, dto);
 
         assertThat(result.getCep()).isEqualTo(enderecoCompleto);
+
         verify(viaCepService, times(1)).buscarEnderecoPorCep("87080078");
+        verify(userRepository).save(result);
     }
 
     @Test
@@ -226,6 +231,8 @@ class UserServiceTest {
         User result = userService.updateUser(1L, dto);
 
         assertThat(result.getName()).isEqualTo("NovoNome");
+
+        verify(userRepository).save(result);
     }
 
     @Test
