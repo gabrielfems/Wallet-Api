@@ -36,7 +36,7 @@ public class GoalBoxController {
     @GetMapping
     @Operation(summary= "Listar caixinhas", description= "Exibe todas as caixinhas cadastradas de todos os usuários da base de dados")
     @ApiResponse(responseCode = "200", description = "Caixinhas encontradas com sucesso")
-    @ApiResponse(responseCode = "404", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
+    @ApiResponse(responseCode = "400", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
     @ApiResponse(responseCode = "500", description = "Erro no servidor")
     public ResponseEntity<List<GoalBoxResponseDTO>> getUserBoxes(@PathVariable Long userId) {
         return ResponseEntity.ok(boxService.getUserBoxes(userId));

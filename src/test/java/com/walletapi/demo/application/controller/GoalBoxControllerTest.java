@@ -1,6 +1,7 @@
 package com.walletapi.demo.application.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.walletapi.demo.application.dto.GoalBoxResponseDTO;
 import com.walletapi.demo.application.service.GoalBoxService;
 import com.walletapi.demo.application.service.UserService;
 import com.walletapi.demo.application.dto.GoalBoxCreateDTO;
@@ -114,13 +115,17 @@ class GoalBoxControllerTest {
 
     @Test
     @DisplayName("Should return 200 when boxes have founds")
-    void getUserBoxesCase1() {
-        List<GoalBox> boxes = new ArrayList<>();
+    void getUserBoxesCase1() throws Exception {
+        GoalBoxResponseDTO responseDTO = new GoalBoxResponseDTO(
+                1L, "Viagem", "Descrição", BigDecimal.valueOf(1000),
+                BigDecimal.ZERO, "0%", 1L);
 
-        when(userService.findUserById(1L)).thenReturn(user);
-        when(boxRepository.findByUserId(1L)).thenReturn(List.of(goalBox));
+        when((boxService.getUserBoxes(1L))).thenReturn(List.of(responseDTO));
 
-
+        mockMvc.perform(get("/api/users/1/goal-boxes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Viagem"))
+                .andExpect(jsonPath("$[0].progress").value("0%"));
     }
 
     @Test
