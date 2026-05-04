@@ -23,8 +23,8 @@ public class UserService {
     private final UserRepository userRepository;
 
     public User findUserById(Long id) { return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));}
-    public User findSenderById(Long id) { return userRepository.findById(id).orElseThrow(() -> new SenderUserNotFoundException());}
-    public User findReceiverById(Long id) { return userRepository.findById(id).orElseThrow(() -> new ReceiverUserNotFoundException());}
+    public User findSenderById(Long id) { return userRepository.findById(id).orElseThrow(SenderUserNotFoundException::new);}
+    public User findReceiverById(Long id) { return userRepository.findById(id).orElseThrow(ReceiverUserNotFoundException::new);}
 
     public void saveUser(User user) {
         this.userRepository.save(user);
