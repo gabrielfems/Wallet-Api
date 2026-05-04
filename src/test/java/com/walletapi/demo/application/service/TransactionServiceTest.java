@@ -10,6 +10,7 @@ import com.walletapi.demo.domain.entities.Transaction;
 import com.walletapi.demo.domain.entities.User;
 import com.walletapi.demo.domain.enums.TransactionType;
 import com.walletapi.demo.infrastructure.repositories.TransactionRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,8 +42,17 @@ class TransactionServiceTest {
     @Mock
     ExecuteService executeService;
 
-    private User userSender;
-    private User userReceiver;
+    User userSender;
+    User userReceiver;
+
+    @BeforeEach
+    void setUp() {
+        userSender =  new User();
+        userSender.setId(1L);
+
+        userReceiver =  new User();
+        userReceiver.setId(2L);
+    }
 
     @Test
     @DisplayName("Should create the transfer when everything is ok")
