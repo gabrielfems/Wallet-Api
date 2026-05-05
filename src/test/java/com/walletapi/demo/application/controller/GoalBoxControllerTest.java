@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.walletapi.demo.application.dto.GoalBoxCreateDTO;
 import com.walletapi.demo.application.dto.GoalBoxDepositDTO;
 import com.walletapi.demo.application.dto.GoalBoxResponseDTO;
+import com.walletapi.demo.application.dto.GoalBoxWithdrawDTO;
+import com.walletapi.demo.application.exceptions.GoalBoxNotFoundException;
+import com.walletapi.demo.application.exceptions.InsufficientBalanceException;
+import com.walletapi.demo.application.exceptions.UnauthorizedBoxAccessException;
 import com.walletapi.demo.application.exceptions.UserNotFoundException;
 import com.walletapi.demo.application.service.GoalBoxService;
-import com.walletapi.demo.application.service.UserService;
 import com.walletapi.demo.domain.entities.GoalBox;
 import com.walletapi.demo.domain.entities.User;
-import com.walletapi.demo.infrastructure.repositories.GoalBoxRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,10 +24,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,12 +37,6 @@ class GoalBoxControllerTest {
 
     @MockBean
     GoalBoxService boxService;
-
-    @MockBean
-    UserService userService;
-
-    @MockBean
-    GoalBoxRepository boxRepository;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -131,6 +125,13 @@ class GoalBoxControllerTest {
     }
 
     @Test
+    @DisplayName("Should return 400")
+    void getUserBoxesCase2() throws Exception {
+        mockMvc.perform(get("/api/users/{userId}/goal-boxes", "abc"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("Should return 200 when goal box ID and the user ID are valid")
     void getBoxCase1() throws Exception {
 
@@ -140,6 +141,30 @@ class GoalBoxControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Viagem"))
                 .andExpect(jsonPath("$.progress").value("0%"));
+    }
+
+    @Test
+    @DisplayName("Should return 403 when box does not belong to the given user")
+    void getBoxCase2() throws Exception {
+
+        doThrow(new UnauthorizedBoxAccessException()).when(boxService).getBox(1L, 99L);
+
+        mockMvc.perform(get("/api/users/{userId}/goal-boxes/{boxId}", 1L, 99L))
+                .andExpect(status().isForbidden());
+
+        verify(boxService).getBox(1L, 99L);
+    }
+
+    @Test
+    @DisplayName("Should return 404 when box not found")
+    void getBoxCase3() throws Exception {
+
+        doThrow(new GoalBoxNotFoundException(1L)).when(boxService).getBox(1L, 99L);
+
+        mockMvc.perform(get("/api/users/{userId}/goal-boxes/{boxId}", 1L, 99L))
+                .andExpect(status().isNotFound());
+
+        verify(boxService).getBox(1L, 99L);
     }
 
     @Test
@@ -161,14 +186,243 @@ class GoalBoxControllerTest {
     }
 
     @Test
-    void deleteBox() {
+    @DisplayName("Should return 400 when amount is null")
+    void depositCase2() throws Exception {
+        GoalBoxDepositDTO dto = new GoalBoxDepositDTO(null);
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/deposit", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(boxService);
     }
 
     @Test
-    void withdraw() {
+    @DisplayName("Should return 400 when amount is zero")
+    void depositCase3() throws Exception {
+        GoalBoxDepositDTO dto = new GoalBoxDepositDTO(BigDecimal.ZERO);
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/deposit", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(boxService);
     }
 
     @Test
-    void updateBox() {
+    @DisplayName("Should return 403 when box does not belong to the given user")
+    void depositCase4() throws Exception {
+
+        GoalBoxDepositDTO dto = new GoalBoxDepositDTO(BigDecimal.valueOf(1000));
+
+        doThrow(new UnauthorizedBoxAccessException()).when(boxService).deposit(1L,
+                99L, BigDecimal.valueOf(1000));
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/deposit", 1L, 99L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isForbidden());
+
+        verify(boxService).deposit(1L, 99L, BigDecimal.valueOf(1000));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when user not found")
+    void depositCase5() throws Exception {
+
+        GoalBoxDepositDTO dto = new GoalBoxDepositDTO(BigDecimal.valueOf(1000));
+
+        doThrow(new UserNotFoundException(99L)).when(boxService).deposit(99L,
+                1L, BigDecimal.valueOf(1000));
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/deposit", 99L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound());
+
+        verify(boxService).deposit(99L, 1L, BigDecimal.valueOf(1000));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when box not found")
+    void depositCase6() throws Exception {
+        GoalBoxDepositDTO dto = new GoalBoxDepositDTO(BigDecimal.valueOf(1000));
+
+        doThrow(new GoalBoxNotFoundException(99L)).when(boxService).deposit(1L,
+                99L, BigDecimal.valueOf(1000));
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/deposit", 1L, 99L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound());
+
+        verify(boxService).deposit(1L, 99L, BigDecimal.valueOf(1000));
+    }
+
+    @Test
+    @DisplayName("Should return 422 when insufficient funds")
+    void depositCase7() throws Exception {
+
+        GoalBoxDepositDTO dto = new GoalBoxDepositDTO(BigDecimal.valueOf(99999));
+
+        doThrow(new InsufficientBalanceException()).when(boxService).deposit(1L,
+                1L, BigDecimal.valueOf(99999));
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/deposit", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isUnprocessableEntity());
+
+        verify(boxService).deposit(1L, 1L, BigDecimal.valueOf(99999));
+    }
+
+    @Test
+    @DisplayName("Should return 204 when box deleted succefully")
+    void deleteBoxCase1() throws Exception {
+        doNothing().when(boxService).deleteBox(1L, 1L);
+
+        mockMvc.perform(delete("/api/users/{userId}/goal-boxes/{boxId}", 1L, 1L))
+                .andExpect(status().isNoContent());
+
+        verify(boxService).deleteBox(1L, 1L);
+    }
+
+    @Test
+    @DisplayName("Should return 403 when box does not belong to the given user")
+    void deleteBoxCase2() throws Exception {
+        doThrow(new UnauthorizedBoxAccessException()).when(boxService).deleteBox(1L, 99L);
+
+        mockMvc.perform(delete("/api/users/{userId}/goal-boxes/{boxId}", 1L, 99L))
+                .andExpect(status().isForbidden());
+
+        verify(boxService).deleteBox(1L, 99L);
+    }
+
+    @Test
+    @DisplayName("Should return 404 when box not found")
+    void deleteBoxCase3() throws Exception {
+        doThrow(new GoalBoxNotFoundException(99L)).when(boxService).deleteBox(1L, 99L);
+
+        mockMvc.perform(delete("/api/users/{userId}/goal-boxes/{boxId}", 1L, 99L))
+                .andExpect(status().isNotFound());
+
+        verify(boxService).deleteBox(1L, 99L);
+    }
+
+    @Test
+    @DisplayName("Should return 200 when withdraw have been succefully")
+    void withdrawCase1() throws Exception{
+        GoalBoxWithdrawDTO dto = new GoalBoxWithdrawDTO(BigDecimal.valueOf(10000));
+
+        when(boxService.withdraw(1L, 1L, BigDecimal.valueOf(10000))).thenReturn(goalBox);
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/withdraw", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentBalance").value(0));
+
+        verify(boxService).withdraw(1L, 1L, BigDecimal.valueOf(10000));
+
+    }
+
+    @Test
+    @DisplayName("Should return 400 when amount is null")
+    void withdrawCase2() throws Exception {
+        GoalBoxWithdrawDTO dto = new GoalBoxWithdrawDTO(null);
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/withdraw", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(boxService);
+    }
+
+    @Test
+    @DisplayName("Should return 400 when amount is zero")
+    void withdrawCase3() throws Exception {
+        GoalBoxWithdrawDTO dto = new GoalBoxWithdrawDTO(BigDecimal.ZERO);
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/withdraw", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(boxService);
+    }
+
+    @Test
+    @DisplayName("Should return 403 when box does not belong to the given user")
+    void withdrawCase4() throws Exception {
+
+        GoalBoxWithdrawDTO dto = new GoalBoxWithdrawDTO(BigDecimal.valueOf(1000));
+
+        doThrow(new UnauthorizedBoxAccessException()).when(boxService).withdraw(1L,
+                99L, BigDecimal.valueOf(1000));
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/withdraw", 1L, 99L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isForbidden());
+
+        verify(boxService).withdraw(1L, 99L, BigDecimal.valueOf(1000));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when user not found")
+    void withdrawCase5() throws Exception {
+
+        GoalBoxWithdrawDTO dto = new GoalBoxWithdrawDTO(BigDecimal.valueOf(1000));
+
+        doThrow(new UserNotFoundException(99L)).when(boxService).withdraw(99L,
+                1L, BigDecimal.valueOf(1000));
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/withdraw", 99L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound());
+
+        verify(boxService).withdraw(99L, 1L, BigDecimal.valueOf(1000));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when box not found")
+    void withdrawCase6() throws Exception {
+        GoalBoxWithdrawDTO dto = new GoalBoxWithdrawDTO(BigDecimal.valueOf(1000));
+
+        doThrow(new GoalBoxNotFoundException(99L)).when(boxService).withdraw(1L,
+                99L, BigDecimal.valueOf(1000));
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/withdraw", 1L, 99L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound());
+
+        verify(boxService).withdraw(1L, 99L, BigDecimal.valueOf(1000));
+    }
+
+    @Test
+    @DisplayName("Should return 422 when insufficient funds")
+    void withdrawCase7() throws Exception {
+
+        GoalBoxWithdrawDTO dto = new GoalBoxWithdrawDTO(BigDecimal.valueOf(99999));
+
+        doThrow(new InsufficientBalanceException()).when(boxService).withdraw(1L,
+                1L, BigDecimal.valueOf(99999));
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/withdraw", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isUnprocessableEntity());
+
+        verify(boxService).withdraw(1L, 1L, BigDecimal.valueOf(99999));
+    }
+
+    @Test
+    @DisplayName("Should return 200 when box updated succefully")
+    void updateBoxCase1() {
     }
 }
