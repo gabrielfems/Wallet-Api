@@ -1,11 +1,12 @@
 package com.walletapi.demo.application.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.walletapi.demo.application.dto.GoalBoxCreateDTO;
+import com.walletapi.demo.application.dto.GoalBoxDepositDTO;
 import com.walletapi.demo.application.dto.GoalBoxResponseDTO;
+import com.walletapi.demo.application.exceptions.UserNotFoundException;
 import com.walletapi.demo.application.service.GoalBoxService;
 import com.walletapi.demo.application.service.UserService;
-import com.walletapi.demo.application.dto.GoalBoxCreateDTO;
-import com.walletapi.demo.application.exceptions.UserNotFoundException;
 import com.walletapi.demo.domain.entities.GoalBox;
 import com.walletapi.demo.domain.entities.User;
 import com.walletapi.demo.infrastructure.repositories.GoalBoxRepository;
@@ -19,13 +20,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(GoalBoxController.class)
 class GoalBoxControllerTest {
@@ -129,11 +131,33 @@ class GoalBoxControllerTest {
     }
 
     @Test
-    void getBox() {
+    @DisplayName("Should return 200 when goal box ID and the user ID are valid")
+    void getBoxCase1() throws Exception {
+
+        when(boxService.getBox(1L, 1L)).thenReturn(goalBox);
+
+        mockMvc.perform(get("/api/users/{userId}/goal-boxes/{boxId}", 1L, 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Viagem"))
+                .andExpect(jsonPath("$.progress").value("0%"));
     }
 
     @Test
-    void deposit() {
+    @DisplayName("Should return 200 when deposit have succefully")
+    void depositCase1() throws Exception{
+        goalBox.setCurrentBalance(BigDecimal.valueOf(10000));
+
+        GoalBoxDepositDTO dto = new GoalBoxDepositDTO(BigDecimal.valueOf(10000));
+
+        when(boxService.deposit(1L, 1L, BigDecimal.valueOf(10000))).thenReturn(goalBox);
+
+        mockMvc.perform(post("/api/users/{userId}/goal-boxes/{boxId}/deposit", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentBalance").value(10000));
+
+        verify(boxService).deposit(1L, 1L, BigDecimal.valueOf(10000));
     }
 
     @Test
