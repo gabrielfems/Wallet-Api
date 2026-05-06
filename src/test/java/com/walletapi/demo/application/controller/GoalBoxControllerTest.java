@@ -1,10 +1,7 @@
 package com.walletapi.demo.application.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.walletapi.demo.application.dto.GoalBoxCreateDTO;
-import com.walletapi.demo.application.dto.GoalBoxDepositDTO;
-import com.walletapi.demo.application.dto.GoalBoxResponseDTO;
-import com.walletapi.demo.application.dto.GoalBoxWithdrawDTO;
+import com.walletapi.demo.application.dto.*;
 import com.walletapi.demo.application.exceptions.GoalBoxNotFoundException;
 import com.walletapi.demo.application.exceptions.InsufficientBalanceException;
 import com.walletapi.demo.application.exceptions.UnauthorizedBoxAccessException;
@@ -422,7 +419,97 @@ class GoalBoxControllerTest {
     }
 
     @Test
-    @DisplayName("Should return 200 when box updated succefully")
-    void updateBoxCase1() {
+    @DisplayName("Should return 200 when box is updated successfully")
+    void updateBoxCase1() throws Exception {
+        GoalBoxUpdateDTO dto = new GoalBoxUpdateDTO("Viagem Europa", "Viagem para a Europa", BigDecimal.valueOf(20000));
+
+        GoalBox updatedBox = new GoalBox();
+        updatedBox.setName("Viagem Europa");
+        updatedBox.setDescription("Viagem para a Europa");
+        updatedBox.setTargetAmount(BigDecimal.valueOf(20000));
+        updatedBox.setCurrentBalance(BigDecimal.ZERO);
+        updatedBox.setUser(user);
+
+        when(boxService.updateBox(1L, 1L, dto)).thenReturn(updatedBox);
+
+        mockMvc.perform(patch("/api/users/{userId}/goal-boxes/{boxId}", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Viagem Europa"))
+                .andExpect(jsonPath("$.targetAmount").value(20000));
+
+        verify(boxService).updateBox(1L, 1L, dto);
+    }
+
+    @Test
+    @DisplayName("Should return 400 when targetAmount is negative")
+    void updateBoxCase2() throws Exception {
+        GoalBoxUpdateDTO dto = new GoalBoxUpdateDTO("Viagem", "Viagem para a Europa", BigDecimal.valueOf(-1));
+
+        mockMvc.perform(patch("/api/users/{userId}/goal-boxes/{boxId}", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(boxService);
+    }
+
+    @Test
+    @DisplayName("Should return 400 when targetAmount is zero")
+    void updateBoxCase3() throws Exception {
+        GoalBoxUpdateDTO dto = new GoalBoxUpdateDTO("Viagem", "Viagem para a Europa", BigDecimal.ZERO);
+
+        mockMvc.perform(patch("/api/users/{userId}/goal-boxes/{boxId}", 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(boxService);
+    }
+
+    @Test
+    @DisplayName("Should return 403 when box does not belong to user")
+    void updateBoxCase4() throws Exception {
+        GoalBoxUpdateDTO dto = new GoalBoxUpdateDTO("Viagem", "Viagem para a Europa", BigDecimal.valueOf(10000));
+
+        doThrow(new UnauthorizedBoxAccessException()).when(boxService).updateBox(1L, 99L, dto);
+
+        mockMvc.perform(patch("/api/users/{userId}/goal-boxes/{boxId}", 1L, 99L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isForbidden());
+
+        verify(boxService).updateBox(1L, 99L, dto);
+    }
+
+    @Test
+    @DisplayName("Should return 404 when user not found")
+    void updateBoxCase5() throws Exception {
+        GoalBoxUpdateDTO dto = new GoalBoxUpdateDTO("Viagem", "Viagem para a Europa", BigDecimal.valueOf(10000));
+
+        doThrow(new UserNotFoundException(99L)).when(boxService).updateBox(99L, 1L, dto);
+
+        mockMvc.perform(patch("/api/users/{userId}/goal-boxes/{boxId}", 99L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound());
+
+        verify(boxService).updateBox(99L, 1L, dto);
+    }
+    
+    @Test
+    @DisplayName("Should return 404 when box not found")
+    void updateBoxCase6() throws Exception {
+        GoalBoxUpdateDTO dto = new GoalBoxUpdateDTO("Viagem", "Viagem para a Europa", BigDecimal.valueOf(10000));
+
+        doThrow(new GoalBoxNotFoundException(99L)).when(boxService).updateBox(1L, 99L, dto);
+
+        mockMvc.perform(patch("/api/users/{userId}/goal-boxes/{boxId}", 1L, 99L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound());
+
+        verify(boxService).updateBox(1L, 99L, dto);
     }
 }
