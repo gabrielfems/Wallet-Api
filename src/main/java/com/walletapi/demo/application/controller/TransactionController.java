@@ -45,7 +45,6 @@ public class TransactionController {
     @ApiResponse(responseCode = "200", description = "Transferência realizada com sucesso")
     @ApiResponse(responseCode = "400", description = "Requisição inválida ou tipo de transação inválido")
     @ApiResponse(responseCode = "404", description = "Usuário remetente ou destinatário não encontrado")
-    @ApiResponse(responseCode = "422", description = "Saldo insuficiente para transferência")
     @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     public ResponseEntity<TransactionResponseDTO> createDeposit(@Valid @RequestBody TransactionDepositDTO data) {
         TransactionResponseDTO response = TransactionResponseDTO.from(
