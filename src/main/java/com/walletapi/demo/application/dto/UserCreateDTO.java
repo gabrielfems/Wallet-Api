@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public record UserCreateDTO(
 
         @NotBlank(message = "Nome obrigatório")
-        @Size(min = 3, max = 100)
+        @Size(min = 2, max = 100)
         String name,
 
         @Email(message = "E-mail inválido")
@@ -33,13 +33,11 @@ public record UserCreateDTO(
         String cep,
 
         @NotBlank(message = "Número obrigatório")
-        @Size(min = 1, max = 5)
         String numero,
 
         String complemento,
 
         @NotNull(message = "Data de nascimento obrigatória")
-        @Past(message = "Data de nascimento deve ser no passado")
         LocalDate birthDate,
 
         @Pattern(
