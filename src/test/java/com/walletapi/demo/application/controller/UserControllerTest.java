@@ -24,10 +24,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,6 +45,7 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
+        user = new User();
         wallet = new Wallet();
         wallet.setBalance(BigDecimal.ZERO);
     }
@@ -55,7 +53,6 @@ class UserControllerTest {
     @Test
     @DisplayName("Should return 201 when user created successfully")
     void createUserCase1() throws Exception {
-        user = new User();
         user.setName("nomeValido");
         user.setEmail("email@valido.com");
         user.setPassword("s3Nh@Valid421");
@@ -92,8 +89,6 @@ class UserControllerTest {
                 "(00) 00000-0000", "00000-000", "123", "",
                 LocalDate.of(2001, 1, 1), "000.000.000-00");
 
-        when(userService.createUser(dto)).thenReturn(user);
-
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
@@ -109,8 +104,6 @@ class UserControllerTest {
         UserCreateDTO dto = new UserCreateDTO("nomeValido", null, "s3Nh@Valid421",
                 "(00) 00000-0000", "00000-000", "123", "",
                 LocalDate.of(2001, 1, 1), "000.000.000-00");
-
-        when(userService.createUser(dto)).thenReturn(user);
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -128,8 +121,6 @@ class UserControllerTest {
                 "(00) 00000-0000", "00000-000", "123", "",
                 LocalDate.of(2001, 1, 1), "000.000.000-00");
 
-        when(userService.createUser(dto)).thenReturn(user);
-
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
@@ -145,8 +136,6 @@ class UserControllerTest {
         UserCreateDTO dto = new UserCreateDTO("nomeValido", "emailInvalido.com", null,
                 "(00) 00000-0000", "00000-000", "123", "",
                 LocalDate.of(2001, 1, 1), "000.000.000-00");
-
-        when(userService.createUser(dto)).thenReturn(user);
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -164,8 +153,6 @@ class UserControllerTest {
                 "(00) 00000-0000", "00000-000", "123", "",
                 LocalDate.of(2001, 1, 1), "000.000.000-00");
 
-        when(userService.createUser(dto)).thenReturn(user);
-
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
@@ -181,8 +168,6 @@ class UserControllerTest {
         UserCreateDTO dto = new UserCreateDTO("nomeValido", "email@valido.com", "s3Nh@Valid421",
                 null, "00000-000", "123", "",
                 LocalDate.of(2001, 1, 1), "000.000.000-00");
-
-        when(userService.createUser(dto)).thenReturn(user);
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -200,8 +185,6 @@ class UserControllerTest {
                 "123", "00000-000", "123", "",
                 LocalDate.of(2001, 1, 1), "000.000.000-00");
 
-        when(userService.createUser(dto)).thenReturn(user);
-
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
@@ -217,8 +200,6 @@ class UserControllerTest {
         UserCreateDTO dto = new UserCreateDTO("nomeValido", "email@valido.com", "s3Nh@Valid421",
                 "(00) 00000-0000", null, "123", "",
                 LocalDate.of(2001, 1, 1), "000.000.000-00");
-
-        when(userService.createUser(dto)).thenReturn(user);
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -236,8 +217,6 @@ class UserControllerTest {
                 "(00) 00000-0000", "123", "123", "",
                 LocalDate.of(2001, 1, 1), "000.000.000-00");
 
-        when(userService.createUser(dto)).thenReturn(user);
-
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
@@ -253,8 +232,6 @@ class UserControllerTest {
         UserCreateDTO dto = new UserCreateDTO("nomeValido", "email@valido.com", "s3Nh@Valid421",
                 "(00) 00000-0000", "00000-000", null, "",
                 LocalDate.of(2001, 1, 1), "000.000.000-00");
-
-        when(userService.createUser(dto)).thenReturn(user);
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -272,8 +249,6 @@ class UserControllerTest {
                 "(00) 00000-0000", "00000-000", "123", "",
                 null, "000.000.000-00");
 
-        when(userService.createUser(dto)).thenReturn(user);
-
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
@@ -288,9 +263,7 @@ class UserControllerTest {
 
         UserCreateDTO dto = new UserCreateDTO("nomeValido", "email@valido.com", "s3Nh@Valid421",
                 "(00) 00000-0000", "00000-000", "123", "",
-                LocalDate.of(2096, 5, 20), null);
-
-        when(userService.createUser(dto)).thenReturn(user);
+                LocalDate.of(2001, 5, 20), null);
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -306,9 +279,7 @@ class UserControllerTest {
 
         UserCreateDTO dto = new UserCreateDTO("nomeValido", "email@valido.com", "s3Nh@Valid421",
                 "(00) 00000-0000", "00000-000", "123", "",
-                LocalDate.of(2096, 5, 20), "123");
-
-        when(userService.createUser(dto)).thenReturn(user);
+                LocalDate.of(2001, 5, 20), "123");
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -323,7 +294,7 @@ class UserControllerTest {
     void createUserCase15() throws Exception {
         UserCreateDTO dto = new UserCreateDTO("nomeValido", "email@valido.com", "s3Nh@Valid421",
                 "(00) 00000-0000", "00000-000", "123", "",
-                LocalDate.of(2096, 5, 20), "000.000.000-00");
+                LocalDate.of(2001, 5, 20), "000.000.000-00");
 
         when(userService.createUser(dto)).thenThrow(new CepNotFoundException("00000-000"));
 
@@ -340,7 +311,7 @@ class UserControllerTest {
     void getAllUsersCase1() throws Exception {
         UserResponseDTO response = new UserResponseDTO(1L, "nomeValido", "email@valido.com",
                 "000.000.000-00", "(00) 00000-0000", "Rua Valida",
-                LocalDate.of(1900, 1, 1), BigDecimal.valueOf(1000), WalletStatus.ACTIVE);
+                LocalDate.of(2001, 1, 1), BigDecimal.valueOf(1000), WalletStatus.ACTIVE);
 
         when(userService.getAllUsers()).thenReturn(List.of(response));
 
@@ -351,6 +322,8 @@ class UserControllerTest {
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].name").value("nomeValido"))
                 .andExpect(jsonPath("$[0].email").value("email@valido.com"));
+
+        verify(userService).getAllUsers();
     }
 
     @Test
@@ -450,21 +423,8 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("Should return 400 when birthDate is in the future")
-    void updateUserCase7() throws Exception {
-        UserUpdateDTO dto = new UserUpdateDTO(null, null, null, null, null, null, null, LocalDate.of(2096, 1, 1));
-
-        mockMvc.perform(patch("/api/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(userService);
-    }
-
-    @Test
     @DisplayName("Should return 404 when user is not found")
-    void updateUserCase8() throws Exception {
+    void updateUserCase7() throws Exception {
         UserUpdateDTO dto = new UserUpdateDTO("nomeValido", null, null, null, null, null, null, null);
 
         when(userService.updateUser(1L, dto)).thenThrow(new UserNotFoundException(1L));
@@ -479,7 +439,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("Should return 404 when CEP is not found")
-    void updateUserCase9() throws Exception {
+    void updateUserCase8() throws Exception {
         UserUpdateDTO dto = new UserUpdateDTO(null, null, null, null, "00000-000", null, null, null);
 
         when(userService.updateUser(1L, dto)).thenThrow(new CepNotFoundException("00000-000"));

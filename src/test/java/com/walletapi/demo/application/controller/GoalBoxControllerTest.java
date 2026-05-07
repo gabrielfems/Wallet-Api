@@ -80,6 +80,8 @@ class GoalBoxControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(boxService);
     }
 
     @Test
@@ -91,6 +93,8 @@ class GoalBoxControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(boxService);
     }
 
     @Test
@@ -122,7 +126,7 @@ class GoalBoxControllerTest {
     }
 
     @Test
-    @DisplayName("Should return 400")
+    @DisplayName("Should return 400 when userId is not a number")
     void getUserBoxesCase2() throws Exception {
         mockMvc.perform(get("/api/users/{userId}/goal-boxes", "abc"))
                 .andExpect(status().isBadRequest());
@@ -261,7 +265,6 @@ class GoalBoxControllerTest {
     @Test
     @DisplayName("Should return 422 when insufficient funds")
     void depositCase7() throws Exception {
-
         GoalBoxDepositDTO dto = new GoalBoxDepositDTO(BigDecimal.valueOf(99999));
 
         doThrow(new InsufficientBalanceException()).when(boxService).deposit(1L,
@@ -312,6 +315,7 @@ class GoalBoxControllerTest {
     @DisplayName("Should return 200 when withdraw have been succefully")
     void withdrawCase1() throws Exception{
         GoalBoxWithdrawDTO dto = new GoalBoxWithdrawDTO(BigDecimal.valueOf(10000));
+        goalBox.setCurrentBalance(BigDecimal.valueOf(10000));
 
         when(boxService.withdraw(1L, 1L, BigDecimal.valueOf(10000))).thenReturn(goalBox);
 
