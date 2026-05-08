@@ -70,8 +70,9 @@ class TransactionServiceTest {
         assertThat(result.getType()).isEqualTo(TransactionType.TRANSFER);
         assertThat(result.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(150));
 
-        verify(transactionValidatorService, times(1)).validateTransfer(userSender, dto.amount());
+        verify(transactionValidatorService).validateTransfer(userSender, dto.amount());
         verify(transactionRepository).save(any(Transaction.class));
+        verify(executeService).executeTransfer(userSender, userReceiver, BigDecimal.valueOf(150));
     }
 
     @Test
@@ -130,6 +131,7 @@ class TransactionServiceTest {
 
         verify(executeService, times(1)).executeDeposit(userSender, dto.amount());
         verify(transactionRepository).save(any(Transaction.class));
+        verify(transactionValidatorService).validateSender(1L);
     }
 
     @Test

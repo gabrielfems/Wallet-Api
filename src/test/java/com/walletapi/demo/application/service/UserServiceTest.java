@@ -57,7 +57,6 @@ class UserServiceTest {
     @Test
     @DisplayName("Should return a User because ID is present on db")
     void findUserByIdCase1() {
-
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         User result = userService.findUserById(1L);

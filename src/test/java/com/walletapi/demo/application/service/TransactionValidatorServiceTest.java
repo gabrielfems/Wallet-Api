@@ -123,7 +123,7 @@ class TransactionValidatorServiceTest {
 
         userSender.getWallet().setBalance(BigDecimal.valueOf(100));
 
-        BigDecimal amount = BigDecimal.valueOf(50);
+        BigDecimal amount = BigDecimal.valueOf(100);
 
         assertThatCode(() -> transactionValidatorService.validateWithdraw(userSender, amount))
                 .doesNotThrowAnyException();

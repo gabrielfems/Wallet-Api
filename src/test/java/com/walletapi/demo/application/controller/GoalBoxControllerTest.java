@@ -315,7 +315,6 @@ class GoalBoxControllerTest {
     @DisplayName("Should return 200 when withdraw have been succefully")
     void withdrawCase1() throws Exception{
         GoalBoxWithdrawDTO dto = new GoalBoxWithdrawDTO(BigDecimal.valueOf(10000));
-        goalBox.setCurrentBalance(BigDecimal.valueOf(10000));
 
         when(boxService.withdraw(1L, 1L, BigDecimal.valueOf(10000))).thenReturn(goalBox);
 
