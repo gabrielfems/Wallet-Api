@@ -51,12 +51,12 @@ class TransactionControllerTest {
         receiver = new User();
         receiver.setName("Maria");
 
+        transaction = new Transaction();
     }
 
     @Test
     @DisplayName("Should return 200 when transfer is successful")
     void createTransferCase1()  throws Exception {
-        transaction = new Transaction();
         transaction.setType(TransactionType.TRANSFER);
         transaction.setAmount(BigDecimal.valueOf(10000));
         transaction.setSender(sender);
@@ -193,7 +193,6 @@ class TransactionControllerTest {
     @Test
     @DisplayName("Should return 200 when deposit is successful")
     void createDepositCase1() throws Exception{
-        transaction = new Transaction();
         transaction.setType(TransactionType.DEPOSIT);
         transaction.setAmount(BigDecimal.valueOf(10000));
         transaction.setSender(sender);
@@ -284,7 +283,6 @@ class TransactionControllerTest {
     @Test
     @DisplayName("Should return 200 when withdraw is successful")
     void createWithdrawCase1() throws Exception {
-        transaction = new Transaction();
         transaction.setType(TransactionType.WITHDRAW);
         transaction.setAmount(BigDecimal.valueOf(10000));
         transaction.setSender(sender);
