@@ -47,12 +47,13 @@ class GoalBoxServiceTest {
 
     @BeforeEach
     void setUp() {
+        user = new User();
+        user.setId(1L);
+
         wallet = new Wallet();
         wallet.setUser(user);
         wallet.setBalance(BigDecimal.valueOf(1000));
 
-        user = new User();
-        user.setId(1L);
         user.setWallet(wallet);
 
         goalBox = new GoalBox();
@@ -165,7 +166,7 @@ class GoalBoxServiceTest {
     void depositCase2() {
         when(boxRepository.findById(1L)).thenReturn(Optional.of(goalBox));
 
-        assertThatThrownBy(() -> boxService.withdraw(1L, 1L, BigDecimal.valueOf(1500)))
+        assertThatThrownBy(() -> boxService.deposit(1L, 1L, BigDecimal.valueOf(1500)))
                 .isInstanceOf(InsufficientBalanceException.class);
     }
 
