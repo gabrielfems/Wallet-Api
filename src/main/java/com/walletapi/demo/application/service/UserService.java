@@ -70,10 +70,8 @@ public class UserService {
         }
 
         user.setPhone(dto.phone() != null ? dto.phone() : user.getPhone());
-        user.setPassword(dto.password() != null ? dto.password() : user.getPassword());
         user.setName(dto.name() != null ? dto.name() : user.getName());
         user.setBirthDate(dto.birthDate() != null ? dto.birthDate() : user.getBirthDate());
-        user.setEmail(dto.email() != null ? dto.email() : user.getEmail());
 
         return userRepository.save(user);
     }
