@@ -16,13 +16,13 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/users/{userId}/goal-boxes")
+@RequestMapping("/api/goal-boxes")
 @Tag(name= "Caixinha", description= "Caixinha de metas do usuário")
 public class GoalBoxController {
 
     private final GoalBoxService boxService;
 
-    @PostMapping
+    @PostMapping("/{userId}")
     @Operation(summary= "Criar caixinha", description= "Cria caixinha com metas pessoais do usuário")
     @ApiResponse(responseCode = "201", description = "Caixinha criada com sucesso")
     @ApiResponse(responseCode = "400", description = "Requisição inválida ou dados obrigatórios ausentes")
@@ -33,7 +33,7 @@ public class GoalBoxController {
         return new ResponseEntity<>(GoalBoxResponseDTO.from(box), HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("/{userId}/list")
     @Operation(summary= "Listar caixinhas", description= "Exibe todas as caixinhas cadastradas de todos os usuários da base de dados")
     @ApiResponse(responseCode = "200", description = "Caixinhas encontradas com sucesso")
     @ApiResponse(responseCode = "400", description = "Requisição inválida, mal formatada ou faltando dados obrigatórios")
@@ -42,7 +42,7 @@ public class GoalBoxController {
         return ResponseEntity.ok(boxService.getUserBoxes(userId));
     }
 
-    @GetMapping("/{boxId}")
+    @GetMapping("/{userId}/{boxId}")
     @Operation(summary= "Exibir caixinha", description= "Filtra uma caixinha específica pelo Id do usuário e Id da caixinha")
     @ApiResponse(responseCode = "200", description = "Caixinha encontrada com sucesso")
     @ApiResponse(responseCode = "403", description = "A caixinha não pertence ao usuário informado")
@@ -53,7 +53,7 @@ public class GoalBoxController {
         return ResponseEntity.ok(GoalBoxResponseDTO.from(box));
     }
 
-    @PostMapping("/{boxId}/deposit")
+    @PostMapping("/{userId}/{boxId}/deposit")
     @Operation(summary= "Depositar dinheiro na caixinha", description= "Adiciona dinheiro na caixinha e atualiza o status da meta")
     @ApiResponse(responseCode = "200", description = "Depósito realizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Requisição inválida ou dados obrigatórios ausentes")
@@ -66,7 +66,7 @@ public class GoalBoxController {
         return ResponseEntity.ok(GoalBoxResponseDTO.from(box));
     }
 
-        @DeleteMapping("/{boxId}")
+        @DeleteMapping("/{userId}/{boxId}")
         @Operation(summary= "Excluir caixinha", description= "Exclui caixinha")
         @ApiResponse(responseCode = "204", description = "Caixinha excluída com sucesso")
         @ApiResponse(responseCode = "403", description = "A caixinha não pertence ao usuário informado")
@@ -77,7 +77,7 @@ public class GoalBoxController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{boxId}/withdraw")
+    @PostMapping("/{userId}/{boxId}/withdraw")
     @Operation(summary= "Sacar dinheiro", description= "Tira dinheiro da caixinha e atualiza o status da meta")
     @ApiResponse(responseCode = "200", description = "Saque realizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Requisição inválida ou dados obrigatórios ausentes")
@@ -90,7 +90,7 @@ public class GoalBoxController {
         return ResponseEntity.ok(GoalBoxResponseDTO.from(box));
     }
 
-    @PatchMapping("/{boxId}")
+    @PatchMapping("/{userId}/{boxId}")
     @Operation(summary= "Atualizar caixinha", description= "Atualiza dados da caixinha")
     @ApiResponse(responseCode = "200", description = "Caixinha atualizada com sucesso")
     @ApiResponse(responseCode = "400", description = "Requisição inválida ou dados obrigatórios ausentes")

@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-//Dados do usuario
-
 @Entity(name= "users")
 @Table(name = "users")
 @EqualsAndHashCode(of="id")
@@ -24,13 +22,9 @@ public class User {
     private Long id;
 
     private String name;
-    private String email;
 
     @Column(unique = true)
     private String document;
-
-    @Column(nullable = false)
-    private String password;
 
     @Column(unique = true)
     private String phone;
@@ -43,15 +37,16 @@ public class User {
 
     private LocalDate birthDate;
 
+    @OneToOne(mappedBy = "user")
+    private UserCredentials credentials;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "wallet_id", referencedColumnName = "id")
     private Wallet wallet;
 
     public User(UserCreateDTO data) {
         this.name = data.name();
-        this.email = data.email();
         this.document = data.document();
-        this.password = data.password();
         this.phone = data.phone();
         this.cep = data.cep();
         this.numero = data.numero();
