@@ -10,7 +10,7 @@ public record UserUpdateDTO(
         String name,
 
         @Email(message = "E-mail inválido")
-        String email,
+        String login,
 
         @Pattern(
                 regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#$%!]).{8,}$",

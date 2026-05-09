@@ -10,17 +10,6 @@ public record UserCreateDTO(
         @Size(min = 2, max = 100)
         String name,
 
-        @Email(message = "E-mail inválido")
-        @NotBlank(message = "E-mail obrigatório")
-        String email,
-
-        @NotBlank(message = "Senha obrigatória")
-        @Pattern(
-                regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#$%!])\\S{8,}$",
-                message = "Senha fraca. A senha deve ter no mínimo 8 caracteres, letras maiúsculas, minúsculas, número e caractere especial (@#$%!)."
-        )
-        String password,
-
         @NotBlank(message = "Telefone obrigatório")
         @Pattern(
                 regexp = "^\\(\\d{2}\\)\\s?\\d{4,5}-\\d{4}$",
