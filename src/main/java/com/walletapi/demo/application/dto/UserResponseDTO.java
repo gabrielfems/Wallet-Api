@@ -9,7 +9,6 @@ import java.time.LocalDate;
 public record UserResponseDTO(
         Long id,
         String name,
-        String email,
         String document,
         String phone,
         String address,
@@ -21,7 +20,6 @@ public record UserResponseDTO(
         return new UserResponseDTO(
                 u.getId(),
                 u.getName(),
-                u.getEmail(),
                 u.getDocument(),
                 u.getPhone(),
                 u.getCep(),
