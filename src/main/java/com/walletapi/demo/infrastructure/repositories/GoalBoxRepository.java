@@ -1,4 +1,3 @@
-// GoalBoxRepository.java
 package com.walletapi.demo.infrastructure.repositories;
 
 import com.walletapi.demo.domain.entities.GoalBox;
