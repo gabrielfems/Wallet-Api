@@ -58,6 +58,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponse(HttpStatus.FORBIDDEN, exception.getMessage());
     }
 
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    private ResponseEntity<RestErrorMessage> emailAlreadyExistsException(EmailAlreadyExistsException exception) {
+        return buildResponse(HttpStatus.FORBIDDEN, exception.getMessage());
+    }
+
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             @NonNull HttpMessageNotReadableException ex,
