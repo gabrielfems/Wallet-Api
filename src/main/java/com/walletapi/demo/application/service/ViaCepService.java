@@ -53,9 +53,6 @@ public class ViaCepService {
         // Cidade/UF
         address.append(", ").append(endereco.city()).append(" - ").append(endereco.state());
 
-        // CEP
-        address.append(", CEP: ").append(endereco.cep());
-
         return address.toString();
     }
 
