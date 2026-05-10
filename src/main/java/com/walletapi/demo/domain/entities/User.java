@@ -1,8 +1,13 @@
 package com.walletapi.demo.domain.entities;
+
 import com.walletapi.demo.application.dto.UserCreateDTO;
+import com.walletapi.demo.domain.enums.UserRole;
 import com.walletapi.demo.domain.enums.WalletStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,7 +19,6 @@ import java.util.ArrayList;
 @Getter
 @Setter
 @NoArgsConstructor
-
 public class User {
 
     @Id
@@ -29,15 +33,23 @@ public class User {
     @Column(unique = true)
     private String phone;
 
+    private String Address;
+
     private String cep;
 
-    private String numero;
+    private String house_number;
 
-    private String complemento;
+    private String complement;
 
     private LocalDate birthDate;
 
-    @OneToOne(mappedBy = "user")
+    @Column(unique = true)
+    private String login;
+
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserCredentials credentials;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -49,19 +61,19 @@ public class User {
         this.document = data.document();
         this.phone = data.phone();
         this.cep = data.cep();
-        this.numero = data.numero();
-        this.complemento = data.complemento();
+        this.house_number = data.numero();
+        this.complement = data.complemento();
         this.birthDate = data.birthDate();
         this.wallet = createDefaultWallet();
     }
 
-        private Wallet createDefaultWallet() {
-            Wallet defaultW = new Wallet();
-            defaultW.setBalance(BigDecimal.ZERO);
-            defaultW.setStatus(WalletStatus.ACTIVE);
-            defaultW.setUser(this);
-            defaultW.setTransactions(new ArrayList<>());
-            return defaultW;
-        }
+    private Wallet createDefaultWallet() {
+        Wallet defaultW = new Wallet();
+        defaultW.setBalance(BigDecimal.ZERO);
+        defaultW.setStatus(WalletStatus.ACTIVE);
+        defaultW.setUser(this);
+        defaultW.setTransactions(new ArrayList<>());
+        return defaultW;
+    }
 }
 
