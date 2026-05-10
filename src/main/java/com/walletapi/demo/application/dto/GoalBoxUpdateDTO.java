@@ -1,4 +1,3 @@
-// GoalBoxUpdateDTO.java
 package com.walletapi.demo.application.dto;
 
 import jakarta.validation.constraints.Positive;
