@@ -90,7 +90,6 @@ public class GoalBoxController {
         return ResponseEntity.ok(GoalBoxResponseDTO.from(box));
     }
 
-    @PatchMapping("/{userId}/{boxId}")
     @Operation(summary= "Atualizar caixinha", description= "Atualiza dados da caixinha")
     @ApiResponse(responseCode = "200", description = "Caixinha atualizada com sucesso")
     @ApiResponse(responseCode = "400", description = "Requisição inválida ou dados obrigatórios ausentes")
