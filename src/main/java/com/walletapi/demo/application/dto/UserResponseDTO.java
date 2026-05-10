@@ -7,14 +7,15 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record UserResponseDTO(
-        Long id,
-        String name,
-        String document,
-        String phone,
-        String address,
-        LocalDate birthDate,
-        BigDecimal walletBalance,
-        WalletStatus walletStatus
+                            Long id,
+                            String name,
+                            String document,
+                            String phone,
+                            String Address,
+                            String Cep,
+                            LocalDate birthDate,
+                            BigDecimal walletBalance,
+                            WalletStatus walletStatus
 ) {
     public static UserResponseDTO from(User u) {
         return new UserResponseDTO(
@@ -22,6 +23,7 @@ public record UserResponseDTO(
                 u.getName(),
                 u.getDocument(),
                 u.getPhone(),
+                u.getAddress(),
                 u.getCep(),
                 u.getBirthDate(),
                 u.getWallet().getBalance(),

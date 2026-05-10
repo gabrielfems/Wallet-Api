@@ -4,13 +4,9 @@ import com.walletapi.demo.application.dto.AuthenticationDTO;
 import com.walletapi.demo.application.dto.LoginResponseDTO;
 import com.walletapi.demo.application.dto.UserRegisterDTO;
 import com.walletapi.demo.application.service.TokenService;
-import com.walletapi.demo.domain.entities.User;
+import com.walletapi.demo.application.service.UserService;
 import com.walletapi.demo.domain.entities.UserCredentials;
-import com.walletapi.demo.domain.entities.Wallet;
-import com.walletapi.demo.domain.enums.WalletStatus;
 import com.walletapi.demo.infrastructure.repositories.UserCredentialsRepository;
-import com.walletapi.demo.infrastructure.repositories.UserRepository;
-import com.walletapi.demo.infrastructure.repositories.WalletRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("auth")
@@ -35,10 +29,7 @@ public class AuthenticationController {
     private UserCredentialsRepository repository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private WalletRepository walletRepository;
+    private UserService userService;
 
     @Autowired
     private TokenService tokenService;
@@ -60,19 +51,9 @@ public class AuthenticationController {
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
         UserCredentials newUserCred = new UserCredentials(data.login(), encryptedPassword, data.role());
 
-        Wallet newWallet = new Wallet();
-        newWallet.setBalance(BigDecimal.ZERO);
-        newWallet.setStatus(WalletStatus.ACTIVE);
-
-        User newUser = new User();
-        newUser.setWallet(newWallet);
-
-        newWallet.setUser(newUser);
+        userService.createUser(data);
 
         this.repository.save(newUserCred);
-        this.userRepository.save(newUser);
-        this.walletRepository.save(newWallet);
-
         return ResponseEntity.ok().build();
     }
 }
