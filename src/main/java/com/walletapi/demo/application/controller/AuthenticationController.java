@@ -7,6 +7,8 @@ import com.walletapi.demo.application.service.TokenService;
 import com.walletapi.demo.application.service.UserService;
 import com.walletapi.demo.domain.entities.UserCredentials;
 import com.walletapi.demo.infrastructure.repositories.UserCredentialsRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,10 @@ public class AuthenticationController {
     private TokenService tokenService;
 
     @PostMapping("/login")
+    @Operation(summary= "Login", description= "Autentica o usuário e retorna um token JWT")
+    @ApiResponse(responseCode= "200", description = "Autenticado com sucesso")
+    @ApiResponse(responseCode= "400", description = "Requisição inválida")
+    @ApiResponse(responseCode= "403", description = "Acesso negado")
     public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data){
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
         var auth = authenticationManager.authenticate(usernamePassword);
@@ -45,15 +51,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
+    @Operation(summary= "Registro", description= "Cria um novo usuário na base de dados")
+    @ApiResponse(responseCode= "200", description = "Usuário criado com sucesso")
+    @ApiResponse(responseCode= "400", description = "Usuário já cadastrado ou dados inválidos")
     public ResponseEntity register(@RequestBody @Valid UserRegisterDTO data){
         if (this.repository.findByLogin(data.login()) != null) return ResponseEntity.badRequest().build();
 
-        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-        UserCredentials newUserCred = new UserCredentials(data.login(), encryptedPassword, data.role());
-
         userService.createUser(data);
 
-        this.repository.save(newUserCred);
         return ResponseEntity.ok().build();
     }
 }

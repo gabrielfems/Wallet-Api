@@ -8,10 +8,13 @@ import com.walletapi.demo.application.exceptions.ReceiverUserNotFoundException;
 import com.walletapi.demo.application.exceptions.SenderUserNotFoundException;
 import com.walletapi.demo.application.exceptions.UserNotFoundException;
 import com.walletapi.demo.domain.entities.User;
+import com.walletapi.demo.domain.entities.UserCredentials;
 import com.walletapi.demo.domain.entities.Wallet;
 import com.walletapi.demo.domain.enums.WalletStatus;
+import com.walletapi.demo.infrastructure.repositories.UserCredentialsRepository;
 import com.walletapi.demo.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,6 +27,7 @@ public class UserService {
 
     private final ViaCepService viaCepService;
     private final UserRepository userRepository;
+    private final UserCredentialsRepository userCredentialsRepository;
 
     public User findUserById(Long id) { return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));}
     public User findSenderById(Long id) { return userRepository.findById(id).orElseThrow(SenderUserNotFoundException::new);}
@@ -35,19 +39,20 @@ public class UserService {
 
     public void createUser(UserRegisterDTO data) {
         Wallet newWallet = new Wallet();
-        User newUser = new User();
-
         newWallet.setBalance(BigDecimal.ZERO);
         newWallet.setStatus(WalletStatus.ACTIVE);
 
-        newUser.setLogin(data.login());
-        newUser.setRole(data.role());
+        User newUser = new User();
+        newUser.setEmail(data.login());
         newUser.setWallet(newWallet);
 
-        newWallet.setUser(newUser);
+        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
+        UserCredentials newUserCred = new UserCredentials(data.login(), encryptedPassword, data.role());
+        newUserCred.setUser(newUser);
         newWallet.setUser(newUser);
 
-        this.userRepository.save(newUser);
+        userRepository.save(newUser);
+        userCredentialsRepository.save(newUserCred);
     }
 
     public List<UserResponseDTO> getAllUsers() {

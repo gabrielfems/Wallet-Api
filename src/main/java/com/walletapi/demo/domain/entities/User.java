@@ -44,10 +44,7 @@ public class User {
     private LocalDate birthDate;
 
     @Column(unique = true)
-    private String login;
-
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private String email;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserCredentials credentials;

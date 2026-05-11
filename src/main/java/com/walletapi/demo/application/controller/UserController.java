@@ -4,12 +4,15 @@ import com.walletapi.demo.application.dto.UserResponseDTO;
 import com.walletapi.demo.application.dto.UserUpdateDTO;
 import com.walletapi.demo.application.service.UserService;
 import com.walletapi.demo.domain.entities.User;
+import com.walletapi.demo.domain.entities.UserCredentials;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,7 +40,18 @@ public class UserController {
     @ApiResponse(responseCode = "400", description = "Requisição inválida ou dados obrigatórios ausentes")
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto) {
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id,
+                                                      @Valid @RequestBody UserUpdateDTO dto,
+                                                      Authentication authentication) {
+
+        UserCredentials credentials = (UserCredentials) authentication.getPrincipal();
+
+        Long authenticatedUserId = credentials.getUser().getId();
+
+        if (!authenticatedUserId.equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         User newUpdate = userService.updateUser(id, dto);
         return ResponseEntity.ok(UserResponseDTO.from(newUpdate));
     }
@@ -47,7 +61,16 @@ public class UserController {
     @ApiResponse(responseCode = "204", description = "Usuário deletado com sucesso")
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id,
+                                           Authentication authentication) {
+
+        UserCredentials credentials = (UserCredentials) authentication.getPrincipal();
+        Long authenticatedUserId = credentials.getUser().getId();
+
+        if (!authenticatedUserId.equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
