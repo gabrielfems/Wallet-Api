@@ -45,10 +45,11 @@ public class UserController {
                                                       Authentication authentication) {
 
         UserCredentials credentials = (UserCredentials) authentication.getPrincipal();
-
         Long authenticatedUserId = credentials.getUser().getId();
+        boolean isAdmin = credentials.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        if (!authenticatedUserId.equals(id)) {
+        if (!isAdmin && !authenticatedUserId.equals(id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -66,8 +67,10 @@ public class UserController {
 
         UserCredentials credentials = (UserCredentials) authentication.getPrincipal();
         Long authenticatedUserId = credentials.getUser().getId();
+        boolean isAdmin = credentials.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        if (!authenticatedUserId.equals(id)) {
+        if (!isAdmin && !authenticatedUserId.equals(id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
