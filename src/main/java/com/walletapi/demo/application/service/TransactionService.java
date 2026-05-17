@@ -24,8 +24,7 @@ public class TransactionService {
     private final ExecuteService executeService;
 
     @Transactional
-    public Transaction createTransfer(TransactionTransferDTO data) {
-        User sender = validatorService.validateSender(data.senderId());
+    public Transaction createTransfer(User sender, TransactionTransferDTO data) {
         User receiver = validatorService.validateReceiver(data.receiverId());
 
         validatorService.validateTransfer(sender, data.amount());
@@ -34,7 +33,8 @@ public class TransactionService {
         Transaction transaction = buildTransaction(
                 data.amount(),
                 sender.getWallet(),
-                sender, receiver
+                sender,
+                receiver
         );
         transaction.setType(TransactionType.TRANSFER);
 
@@ -46,16 +46,15 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction createDeposit(TransactionDepositDTO data) {
-        User user = validatorService.validateSender(data.userId());
-
+    public Transaction createDeposit(User user, TransactionDepositDTO data) {
         executeService.executeDeposit(user, data.amount());
 
         Transaction transaction = buildTransaction(
                 data.amount(),
                 user.getWallet(),
                 user,
-                null);
+                null
+        );
         transaction.setType(TransactionType.DEPOSIT);
 
         transactionRepository.save(transaction);
@@ -65,9 +64,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction createWithdraw(TransactionWithdrawDTO data) {
-        User user = validatorService.validateSender(data.senderId());
-
+    public Transaction createWithdraw(User user, TransactionWithdrawDTO data) {
         validatorService.validateWithdraw(user, data.amount());
         executeService.executeWithdraw(user, data.amount());
 
@@ -75,7 +72,8 @@ public class TransactionService {
                 data.amount(),
                 user.getWallet(),
                 user,
-                null);
+                null
+        );
         transaction.setType(TransactionType.WITHDRAW);
 
         transactionRepository.save(transaction);
