@@ -22,11 +22,10 @@ import java.util.List;
 public class GoalBoxService {
 
     private final GoalBoxRepository boxRepository;
-    private final UserService userService;
 
-    public GoalBox createBox(Long userId, GoalBoxCreateDTO dto) {
-        User user = userService.findUserById(userId);
+    // UserService removido — o User já chega pronto do controller
 
+    public GoalBox createBox(User user, GoalBoxCreateDTO dto) {
         GoalBox box = new GoalBox();
         box.setName(dto.name());
         box.setDescription(dto.description());
@@ -36,29 +35,22 @@ public class GoalBoxService {
         return boxRepository.save(box);
     }
 
-    public List<GoalBoxResponseDTO> getUserBoxes(Long userId) {
-        userService.findUserById(userId);
-        return boxRepository.findByUserId(userId)
+    public List<GoalBoxResponseDTO> getUserBoxes(User user) {
+        return boxRepository.findByUser(user)
                 .stream()
                 .map(GoalBoxResponseDTO::from)
                 .toList();
     }
 
-    public GoalBox getBox(Long userId, Long boxId) {
-        GoalBox box = boxRepository.findById(boxId)
+    public GoalBox getBox(User user, Long boxId) {
+        return boxRepository.findByIdAndUser(boxId, user)
                 .orElseThrow(() -> new GoalBoxNotFoundException(boxId));
-
-        if (!box.getUser().getId().equals(userId)) {
-            throw new UnauthorizedBoxAccessException();
-        }
-
-        return box;
     }
 
     @Transactional
-    public GoalBox deposit(Long userId, Long boxId, BigDecimal amount) {
-        GoalBox box = getBox(userId, boxId);
-        Wallet wallet = box.getUser().getWallet();
+    public GoalBox deposit(User user, Long boxId, BigDecimal amount) {
+        GoalBox box = getBox(user, boxId);
+        Wallet wallet = user.getWallet();
 
         if (wallet.getBalance().compareTo(amount) < 0) {
             throw new InsufficientBalanceException();
@@ -66,41 +58,36 @@ public class GoalBoxService {
 
         box.setCurrentBalance(box.getCurrentBalance().add(amount));
         wallet.setBalance(wallet.getBalance().subtract(amount));
-        userService.saveUser(box.getUser());
 
         return boxRepository.save(box);
     }
 
     @Transactional
-    public void deleteBox(Long userId, Long boxId) {
-        GoalBox box = getBox(userId, boxId);
-        User user = userService.findUserById(userId);
+    public void deleteBox(User user, Long boxId) {
+        GoalBox box = getBox(user, boxId);
 
         user.getWallet().setBalance(user.getWallet().getBalance().add(box.getCurrentBalance()));
 
-        userService.saveUser(user);
         boxRepository.delete(box);
     }
 
     @Transactional
-    public GoalBox withdraw(Long userId, Long boxId, BigDecimal amount) {
-        GoalBox box = getBox(userId, boxId);
-        Wallet wallet = box.getUser().getWallet();
+    public GoalBox withdraw(User user, Long boxId, BigDecimal amount) {
+        GoalBox box = getBox(user, boxId);
+        Wallet wallet = user.getWallet();
 
         if (box.getCurrentBalance().compareTo(amount) < 0) {
             throw new InsufficientBalanceException();
         }
 
-        BigDecimal newBoxBalance = box.getCurrentBalance().subtract(amount);
-        box.setCurrentBalance(newBoxBalance);
+        box.setCurrentBalance(box.getCurrentBalance().subtract(amount));
         wallet.setBalance(wallet.getBalance().add(amount));
 
-        userService.saveUser(box.getUser());
         return boxRepository.save(box);
     }
 
-    public GoalBox updateBox(Long userId, Long boxId, GoalBoxUpdateDTO dto) {
-        GoalBox box = getBox(userId, boxId);
+    public GoalBox updateBox(User user, Long boxId, GoalBoxUpdateDTO dto) {
+        GoalBox box = getBox(user, boxId);
 
         if (dto.name() != null) box.setName(dto.name());
         if (dto.description() != null) box.setDescription(dto.description());
