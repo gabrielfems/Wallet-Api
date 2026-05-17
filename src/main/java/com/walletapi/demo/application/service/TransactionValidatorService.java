@@ -13,10 +13,6 @@ public class TransactionValidatorService {
 
     private final UserService userService;
 
-    public User validateSender(Long fromUserId) {
-        return userService.findSenderById(fromUserId);
-    }
-
     public User validateReceiver(Long toUserId) {
         return userService.findReceiverById(toUserId);
     }
