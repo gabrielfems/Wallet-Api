@@ -5,7 +5,6 @@ import com.walletapi.demo.application.dto.UserResponseDTO;
 import com.walletapi.demo.application.dto.UserUpdateDTO;
 import com.walletapi.demo.application.dto.ViaCepResponseDTO;
 import com.walletapi.demo.application.exceptions.ReceiverUserNotFoundException;
-import com.walletapi.demo.application.exceptions.SenderUserNotFoundException;
 import com.walletapi.demo.application.exceptions.UserNotFoundException;
 import com.walletapi.demo.domain.entities.User;
 import com.walletapi.demo.domain.entities.UserCredentials;
@@ -13,6 +12,7 @@ import com.walletapi.demo.domain.entities.Wallet;
 import com.walletapi.demo.domain.enums.WalletStatus;
 import com.walletapi.demo.infrastructure.repositories.UserCredentialsRepository;
 import com.walletapi.demo.infrastructure.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,13 +30,13 @@ public class UserService {
     private final UserCredentialsRepository userCredentialsRepository;
 
     public User findUserById(Long id) { return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));}
-    public User findSenderById(Long id) { return userRepository.findById(id).orElseThrow(SenderUserNotFoundException::new);}
     public User findReceiverById(Long id) { return userRepository.findById(id).orElseThrow(ReceiverUserNotFoundException::new);}
 
     public void saveUser(User user) {
         this.userRepository.save(user);
     }
 
+    @Transactional
     public void createUser(UserRegisterDTO data) {
         Wallet newWallet = new Wallet();
         newWallet.setBalance(BigDecimal.ZERO);

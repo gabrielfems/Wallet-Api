@@ -39,6 +39,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Requisição inválida ou dados obrigatórios ausentes")
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    @ApiResponse(responseCode = "422", description = "Usuário não tem permissão para atualizar essa conta")
     @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id,
                                                       @Valid @RequestBody UserUpdateDTO dto,
@@ -61,6 +62,7 @@ public class UserController {
     @Operation(summary= "Deletar usuário", description= "Remove um usuário da base de dados")
     @ApiResponse(responseCode = "204", description = "Usuário deletado com sucesso")
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    @ApiResponse(responseCode = "422", description = "Usuário não tem permissão para deletar essa conta")
     @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id,
                                            Authentication authentication) {
