@@ -23,11 +23,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
-    @ExceptionHandler(SenderUserNotFoundException.class)
-    private ResponseEntity<RestErrorMessage> senderUserNotFoundHandler(SenderUserNotFoundException exception) {
-        return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage());
-    }
-
     @ExceptionHandler(ReceiverUserNotFoundException.class)
     private ResponseEntity<RestErrorMessage> receiverNotFoundHandler(ReceiverUserNotFoundException exception) {
         return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage());

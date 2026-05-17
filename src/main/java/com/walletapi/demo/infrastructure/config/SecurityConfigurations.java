@@ -29,6 +29,11 @@ public class SecurityConfigurations {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/index.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/goal-boxes/list").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/users/list").hasRole("ADMIN")
                         .anyRequest().authenticated()
