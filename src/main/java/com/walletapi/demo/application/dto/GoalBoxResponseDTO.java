@@ -1,4 +1,3 @@
-// GoalBoxResponseDTO.java
 package com.walletapi.demo.application.dto;
 
 import com.walletapi.demo.domain.entities.GoalBox;

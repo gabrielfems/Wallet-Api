@@ -58,6 +58,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponse(HttpStatus.FORBIDDEN, exception.getMessage());
     }
 
+    @ExceptionHandler(UnauthorizedUserAccessException.class)
+    private ResponseEntity<RestErrorMessage> unauthorizedUserAccessException(UnauthorizedUserAccessException exception) {
+        return buildResponse(HttpStatus.FORBIDDEN, exception.getMessage());
+    }
+
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             @NonNull HttpMessageNotReadableException ex,

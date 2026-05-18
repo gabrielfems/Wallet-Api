@@ -10,24 +10,22 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
-@Tag(name= "Users", description= "Gereciador de usuários")
+@Tag(name = "Users", description = "Gerenciador de usuários")
 public class UserController {
 
     private final UserService userService;
 
     @GetMapping("/list")
-    @Operation(summary= "Listar usuários", description= "Lista todos os usuários cadastrados")
+    @Operation(summary = "Listar usuários", description = "Lista todos os usuários cadastrados")
     @ApiResponse(responseCode = "200", description = "Usuários encontrados com sucesso")
     @ApiResponse(responseCode = "500", description = "Erro no servidor")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
@@ -35,48 +33,32 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary= "Atualizar usuário", description= "Método para atualizar os dados de um usuário")
+    @Operation(summary = "Atualizar usuário", description = "Atualiza os dados de um usuário")
     @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Requisição inválida ou dados obrigatórios ausentes")
+    @ApiResponse(responseCode = "403", description = "Sem permissão para atualizar essa conta")
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
-    @ApiResponse(responseCode = "422", description = "Usuário não tem permissão para atualizar essa conta")
     @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id,
-                                                      @Valid @RequestBody UserUpdateDTO dto,
-                                                      Authentication authentication) {
+    public ResponseEntity<UserResponseDTO> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserUpdateDTO dto,
+            @AuthenticationPrincipal UserCredentials credentials) {
 
-        UserCredentials credentials = (UserCredentials) authentication.getPrincipal();
-        Long authenticatedUserId = credentials.getUser().getId();
-        boolean isAdmin = credentials.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-        if (!isAdmin && !authenticatedUserId.equals(id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        User newUpdate = userService.updateUser(id, dto);
-        return ResponseEntity.ok(UserResponseDTO.from(newUpdate));
+        User updated = userService.updateUser(id, dto, credentials);
+        return ResponseEntity.ok(UserResponseDTO.from(updated));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary= "Deletar usuário", description= "Remove um usuário da base de dados")
+    @Operation(summary = "Deletar usuário", description = "Remove um usuário da base de dados")
     @ApiResponse(responseCode = "204", description = "Usuário deletado com sucesso")
+    @ApiResponse(responseCode = "403", description = "Sem permissão para deletar essa conta")
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
-    @ApiResponse(responseCode = "422", description = "Usuário não tem permissão para deletar essa conta")
     @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id,
-                                           Authentication authentication) {
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserCredentials credentials) {
 
-        UserCredentials credentials = (UserCredentials) authentication.getPrincipal();
-        Long authenticatedUserId = credentials.getUser().getId();
-        boolean isAdmin = credentials.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-        if (!isAdmin && !authenticatedUserId.equals(id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        userService.deleteUser(id);
+        userService.deleteUser(id, credentials);
         return ResponseEntity.noContent().build();
     }
 }
