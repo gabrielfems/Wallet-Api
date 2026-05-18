@@ -4,6 +4,8 @@
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3-green)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-blue)
 ![JWT](https://img.shields.io/badge/Auth-JWT-black)
+![JUnit 5](https://img.shields.io/badge/Tests-JUnit_5-red)
+![Mockito](https://img.shields.io/badge/Mocking-Mockito-brightgreen)
 
 API REST de carteira digital com autenticação JWT, controle de transações financeiras e gerenciamento de metas de economia.
 
@@ -48,7 +50,7 @@ garantidos por autenticação JWT e controle de ownership via Spring Security.
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | GET | `/users/{id}` | Busca dados do usuário |
-| PUT | `/users/{id}` | Atualiza dados do usuário |
+| PATCH | `/users/{id}` | Atualiza dados do usuário |
 | DELETE | `/users/{id}` | Remove o usuário |
  
 ### Transações
@@ -65,7 +67,7 @@ garantidos por autenticação JWT e controle de ownership via Spring Security.
 | POST | `/goal-boxes` | Cria uma caixinha de meta |
 | GET | `/goal-boxes` | Lista caixinhas do usuário |
 | GET | `/goal-boxes/{id}` | Busca caixinha por ID |
-| PUT | `/goal-boxes/{id}` | Atualiza caixinha |
+| PATCH | `/goal-boxes/{id}` | Atualiza caixinha |
 | POST | `/goal-boxes/{id}/deposit` | Deposita em uma caixinha |
 | POST | `/goal-boxes/{id}/withdraw` | Saca de uma caixinha |
 | DELETE | `/goal-boxes/{id}` | Remove caixinha e retorna saldo à carteira |
@@ -85,6 +87,25 @@ src/main/java/com/walletapi/demo/
 └── infrastructure/
     ├── config/
     └── repositories/
+```
+
+## Testes
+
+A aplicação possui testes unitários nas camadas de controller e service utilizando JUnit 5 e Mockito.
+
+Os testes de controller foram desenvolvidos com `@WebMvcTest` e `MockMvc`, validando comportamento das rotas, autenticação e respostas HTTP.
+
+Os testes de service utilizam `MockitoExtension`, garantindo isolamento das regras de negócio através de mocks das dependências.
+
+### Tecnologias utilizadas
+- JUnit 5
+- Mockito
+- MockMvc
+
+### Executar testes
+
+```bash
+./mvnw test
 ```
 
 ## Como Rodar
