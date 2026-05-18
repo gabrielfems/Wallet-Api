@@ -5,6 +5,7 @@ import com.walletapi.demo.application.dto.UserResponseDTO;
 import com.walletapi.demo.application.dto.UserUpdateDTO;
 import com.walletapi.demo.application.dto.ViaCepResponseDTO;
 import com.walletapi.demo.application.exceptions.ReceiverUserNotFoundException;
+import com.walletapi.demo.application.exceptions.UnauthorizedUserAccessException;
 import com.walletapi.demo.application.exceptions.UserNotFoundException;
 import com.walletapi.demo.domain.entities.User;
 import com.walletapi.demo.domain.entities.UserCredentials;
@@ -20,17 +21,21 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 
-
 @Service
-@RequiredArgsConstructor()
+@RequiredArgsConstructor
 public class UserService {
 
     private final ViaCepService viaCepService;
     private final UserRepository userRepository;
     private final UserCredentialsRepository userCredentialsRepository;
 
-    public User findUserById(Long id) { return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));}
-    public User findReceiverById(Long id) { return userRepository.findById(id).orElseThrow(ReceiverUserNotFoundException::new);}
+    public User findUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    public User findReceiverById(Long id) {
+        return userRepository.findById(id).orElseThrow(ReceiverUserNotFoundException::new);
+    }
 
     public void saveUser(User user) {
         this.userRepository.save(user);
@@ -62,7 +67,19 @@ public class UserService {
                 .toList();
     }
 
-    public User updateUser(Long id, UserUpdateDTO dto) {
+    private void checkAccess(UserCredentials credentials, Long targetUserId) {
+        boolean isAdmin = credentials.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isOwner = credentials.getUser().getId().equals(targetUserId);
+
+        if (!isAdmin && !isOwner) {
+            throw new UnauthorizedUserAccessException();
+        }
+    }
+
+    public User updateUser(Long id, UserUpdateDTO dto, UserCredentials credentials) {
+        checkAccess(credentials, id);
+
         User user = findUserById(id);
 
         if (dto.cep() != null) {
@@ -86,10 +103,8 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void deleteUser(Long id) {
+    public void deleteUser(Long id, UserCredentials credentials) {
+        checkAccess(credentials, id);
         userRepository.delete(findUserById(id));
     }
 }
-
-
-

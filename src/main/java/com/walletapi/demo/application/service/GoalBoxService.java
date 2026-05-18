@@ -23,8 +23,6 @@ public class GoalBoxService {
 
     private final GoalBoxRepository boxRepository;
 
-    // UserService removido — o User já chega pronto do controller
-
     public GoalBox createBox(User user, GoalBoxCreateDTO dto) {
         GoalBox box = new GoalBox();
         box.setName(dto.name());
